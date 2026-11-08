@@ -9,7 +9,7 @@
 
 **Blocked by:** 02 — TwinAPI Audit, Real Dual-Model Gemma 4 Matrix, and SSOT Compiler
 
-**Status:** `ready-for-agent`
+**Status:** `done`
 
 **Needs:** None — a worker can check every item unaided
 
@@ -27,3 +27,9 @@
 - [x] [Confirmation] `notebooks/reproduce_statebridge.ipynb` executes cleanly from top to bottom in `< 15 seconds` without internet or API keys and outputs the exact 5-arm ablation tables and McNemar / Bootstrap statistics from `artifacts/metrics_ssot.json` — Source: Story 1, Story 6
 - [x] [Confirmation] `explorer/index.html` is a self-contained single-file HTML application driven by `artifacts/explorer_bundle.json` with `TwinAPI` Stateful False-Friend Map, 1-vs-1 Diff Split View, auto-collapsed identical HTTP steps, highlighted `First-Divergence Step`, and `#case=<id>&arm=<arm>&model=<model>` URL hash deep-linking — Source: Story 4
 - [x] [Confirmation] `scripts/verify_ssot_consistency.py` checks all 5 surfaces (`writeup/KAGGLE_WRITEUP.md`, `paper/paper.md` + `paper/paper.pdf`, `notebooks/reproduce_statebridge.ipynb`, `explorer/index.html`, `README.md`) against `artifacts/metrics_ssot.json`, failing on any drifted number or missing artifact (verified with a positive mutation control test in `tests/test_verify_ssot_consistency.py`) — Source: Story 6 — Failure: F5
+
+## Verification Log
+
+- **Ticket 03 YAGNI Runner (`2026-11-09`)**: `ticket-yagni-runner.py` returned `unreviewed: runner-error` (`UnicodeDecodeError` when `subprocess.run(..., text=True)` decoded `git diff` over `paper/paper.pdf`'s `%PDF-1.4\n%\x93\x8c\x8b\x9e` header). Recorded per `/implement` Inline Step 3 without retrying with different arguments; full scope/YAGNI review runs at Step 3 closeout (`review-implement`).
+- **Visual & SSOT Audit (`2026-11-09`)**: Visually inspected `fig1_5arm_ablation.png`, `fig2_family_breakdown.png`, `fig3_twinapi_paradox.png`, `paper/paper.pdf` (pages 1–3), and Playwright screenshots of `explorer/index.html` (`1440×1100`); caught and fixed a stale `5.96e-7` fallback string in `explorer_template.html` and added a strict SSOT percentage allowlist + McNemar token check to `scripts/verify_ssot_consistency.py`.
+

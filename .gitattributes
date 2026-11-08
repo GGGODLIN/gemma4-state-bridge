@@ -1,3 +1,5 @@
+*.pdf binary
+*.png binary
 explorer/index.html -diff
 artifacts/*.jsonl -diff
 artifacts/explorer_bundle.json -diff
