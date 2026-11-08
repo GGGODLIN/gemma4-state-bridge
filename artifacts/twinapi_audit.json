@@ -1,0 +1,212 @@
+{
+  "requests_version": "2.34.2",
+  "httpx_version": "0.28.1",
+  "summary": {
+    "requests_top_level_functions": [
+      "delete",
+      "get",
+      "head",
+      "options",
+      "patch",
+      "post",
+      "put",
+      "request",
+      "session"
+    ],
+    "top_level_exact_name_overlap": [
+      "delete",
+      "get",
+      "head",
+      "options",
+      "patch",
+      "post",
+      "put",
+      "request"
+    ],
+    "top_level_exact_name_overlap_ratio": 0.8889,
+    "session_client_core_overlap": [
+      "close",
+      "delete",
+      "get",
+      "head",
+      "options",
+      "patch",
+      "post",
+      "put",
+      "request",
+      "send"
+    ],
+    "session_client_core_overlap_ratio": 0.8333,
+    "stateful_false_friend_count": 12,
+    "total_pairs_audited": 15,
+    "mean_false_friend_embedding_cosine_256d": 0.873,
+    "mean_false_friend_short_name_similarity": 0.7876
+  },
+  "pairs": [
+    {
+      "pair_id": "P01",
+      "req_symbol": "requests.Session.post",
+      "httpx_symbol": "httpx.Client.post",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.1111,
+      "embedding_cosine_256d": 0.8776,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F1_REDIRECT_FOLLOW_DEFAULT",
+      "divergence_mechanism": "requests defaults to allow_redirects=True; httpx renames kwarg to follow_redirects and defaults to False."
+    },
+    {
+      "pair_id": "P02",
+      "req_symbol": "requests.Session.get",
+      "httpx_symbol": "httpx.Client.get",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.1667,
+      "embedding_cosine_256d": 0.8655,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F1_REDIRECT_FOLLOW_DEFAULT",
+      "divergence_mechanism": "Identical method name (.get), but 301/302 redirect following is disabled by default in httpx."
+    },
+    {
+      "pair_id": "P03",
+      "req_symbol": "requests.Session.request",
+      "httpx_symbol": "httpx.Client.request",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.25,
+      "embedding_cosine_256d": 0.915,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F2_CROSS_ORIGIN_AUTH_STRIP",
+      "divergence_mechanism": "requests Session.request accepts hooks= and allow_redirects=; httpx moves event_hooks to Client.__init__."
+    },
+    {
+      "pair_id": "P04",
+      "req_symbol": "requests.Session",
+      "httpx_symbol": "httpx.Client",
+      "short_name_similarity": 0.1429,
+      "signature_isomorphism": 0.05,
+      "embedding_cosine_256d": 0.7432,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F2_CROSS_ORIGIN_AUTH_STRIP",
+      "divergence_mechanism": "requests.Session mutates headers/hooks in-place via s.hooks['response']; httpx.Client uses event_hooks and immutable URL/Header normalization."
+    },
+    {
+      "pair_id": "P05",
+      "req_symbol": "requests.cookies.RequestsCookieJar.get_dict",
+      "httpx_symbol": "httpx.Cookies",
+      "short_name_similarity": 0.125,
+      "signature_isomorphism": 0.3333,
+      "embedding_cosine_256d": 0.7142,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F3_COOKIE_JAR_SCOPING",
+      "divergence_mechanism": "requests provides session.cookies.get_dict(); httpx.Cookies has no .get_dict() method and requires dict(client.cookies) or jar iteration."
+    },
+    {
+      "pair_id": "P06",
+      "req_symbol": "requests.Session.put",
+      "httpx_symbol": "httpx.Client.put",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.1,
+      "embedding_cosine_256d": 0.8665,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F3_COOKIE_JAR_SCOPING",
+      "divergence_mechanism": "Cookie persistence and response hook mutation timing differ before vs after response return."
+    },
+    {
+      "pair_id": "P07",
+      "req_symbol": "requests.Response.iter_content",
+      "httpx_symbol": "httpx.Response.iter_bytes",
+      "short_name_similarity": 0.5833,
+      "signature_isomorphism": 0.5,
+      "embedding_cosine_256d": 0.9109,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F4_STREAM_CONTEXT_LIFECYCLE",
+      "divergence_mechanism": "requests uses session.get(url, stream=True) + resp.iter_content(); httpx requires `with client.stream('GET', url) as resp: resp.iter_bytes()`."
+    },
+    {
+      "pair_id": "P08",
+      "req_symbol": "requests.Response.close",
+      "httpx_symbol": "httpx.Response.close",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 1.0,
+      "embedding_cosine_256d": 0.9438,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F4_STREAM_CONTEXT_LIFECYCLE",
+      "divergence_mechanism": "Identical method name (.close), but httpx streaming responses must be consumed/closed inside client.stream() context manager."
+    },
+    {
+      "pair_id": "P09",
+      "req_symbol": "requests.Response.raise_for_status",
+      "httpx_symbol": "httpx.Response.raise_for_status",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 1.0,
+      "embedding_cosine_256d": 0.9777,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F5_CLIENT_INIT_AND_STATUS_ERROR",
+      "divergence_mechanism": "Identical method name, but raises requests.exceptions.HTTPError vs httpx.HTTPStatusError with distinct hierarchy and message format."
+    },
+    {
+      "pair_id": "P10",
+      "req_symbol": "requests.exceptions.HTTPError",
+      "httpx_symbol": "httpx.HTTPStatusError",
+      "short_name_similarity": 0.6,
+      "signature_isomorphism": 0.5,
+      "embedding_cosine_256d": 0.8597,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F5_CLIENT_INIT_AND_STATUS_ERROR",
+      "divergence_mechanism": "In httpx, HTTPError is the base class for all errors while HTTPStatusError is the status-code subclass (inverting requests' naming!)."
+    },
+    {
+      "pair_id": "P11",
+      "req_symbol": "requests.Session.delete",
+      "httpx_symbol": "httpx.Client.delete",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.1429,
+      "embedding_cosine_256d": 0.9005,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F1_REDIRECT_FOLLOW_DEFAULT",
+      "divergence_mechanism": "Identical short name (.delete), diverges on redirect following default and body parameter support."
+    },
+    {
+      "pair_id": "P12",
+      "req_symbol": "requests.Session.patch",
+      "httpx_symbol": "httpx.Client.patch",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.1,
+      "embedding_cosine_256d": 0.9015,
+      "is_stateful_false_friend": true,
+      "divergence_family": "F1_REDIRECT_FOLLOW_DEFAULT",
+      "divergence_mechanism": "Identical short name (.patch), diverges on follow_redirects default and JSON whitespace serialization."
+    },
+    {
+      "pair_id": "P13",
+      "req_symbol": "requests.Session.head",
+      "httpx_symbol": "httpx.Client.head",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.1429,
+      "embedding_cosine_256d": 0.9081,
+      "is_stateful_false_friend": false,
+      "divergence_family": "NONE",
+      "divergence_mechanism": "Both default to not following redirects on HEAD unless explicitly enabled."
+    },
+    {
+      "pair_id": "P14",
+      "req_symbol": "requests.Session.options",
+      "httpx_symbol": "httpx.Client.options",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 0.1429,
+      "embedding_cosine_256d": 0.9093,
+      "is_stateful_false_friend": false,
+      "divergence_family": "NONE",
+      "divergence_mechanism": "Direct single-step OPTIONS call behaves equivalently when no redirect hop occurs."
+    },
+    {
+      "pair_id": "P15",
+      "req_symbol": "requests.Response.json",
+      "httpx_symbol": "httpx.Response.json",
+      "short_name_similarity": 1.0,
+      "signature_isomorphism": 1.0,
+      "embedding_cosine_256d": 0.8992,
+      "is_stateful_false_friend": false,
+      "divergence_family": "NONE",
+      "divergence_mechanism": "Both decode UTF-8 JSON response bodies via standard json.loads semantics."
+    }
+  ]
+}
