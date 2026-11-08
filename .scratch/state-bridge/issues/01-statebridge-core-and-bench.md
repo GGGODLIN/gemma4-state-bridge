@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately
 
-**Status:** `ready-for-agent`
+**Status:** `done`
 
 **Needs:** None — a worker can check every item unaided
 

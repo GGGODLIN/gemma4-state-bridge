@@ -252,7 +252,7 @@ def check_ast_anticheat(files_map: dict[str, str]) -> dict[str, Any]:
 
 
 def _make_distractors_code(variant_idx: int, family_tag: str) -> str:
-  """Generate HTTP-themed embedding decoys (for Arm 3) and unrelated equal-token helpers (for Arm 5)."""
+  """Generate HTTP-themed embedding decoy (for Arm 3) and unrelated equal-token helper (for Arm 5)."""
   return f'''"""Auxiliary utilities and HTTP formatting helpers for {family_tag}_{variant_idx:02d}."""
 
 import httpx
@@ -266,29 +266,18 @@ def preview_http_headers(url: str, token: str) -> dict:
   return {{"url": url, "headers": base_headers, "follow_redirects": False}}
 
 
-def format_endpoint_url(base_url: str, route_suffix: str) -> str:
-  """Build normalized HTTP endpoint URL for GET/POST client requests."""
-  clean_base = base_url.rstrip("/")
-  clean_route = route_suffix.lstrip("/")
-  return f"{{clean_base}}/{{clean_route}}"
-
-
 def compute_window_digest(values: list[int], modulus: int = 997) -> dict:
-  """Unrelated accounting helper: compute rolling window checksum and summary stats."""
+  """Unrelated accounting helper: compute rolling window checksum, summary stats, and ledger row."""
   total = 0
   rolling = []
   for idx, item in enumerate(values):
     total = (total + (item * (idx + 1))) % modulus
     rolling.append(total)
-  return {{"checksum": total, "count": len(values), "series": rolling[-3:]}}
-
-
-def format_audit_record(record_id: str, metrics: dict) -> str:
-  """Unrelated reporting helper: format structured ledger string for audit archive."""
-  keys = sorted(metrics.keys())
-  parts = [f"{{k}}={{metrics[k]}}" for k in keys]
-  joined = "|".join(parts)
-  return f"[AUDIT:{{record_id}}:v{variant_idx:02d}] {{joined}}"
+  summary = {{"checksum": total, "count": len(values), "series": rolling[-3:]}}
+  keys = sorted(summary.keys())
+  joined = "|".join(f"{{k}}={{summary[k]}}" for k in keys)
+  summary["audit_line"] = f"[AUDIT:v{variant_idx:02d}] {{joined}}"
+  return summary
 '''
 
 
@@ -803,9 +792,9 @@ def build_arm_context(
     selected_keys: list[str] = []
     selected_blocks: list[str] = []
   elif arm_id == "arm3_embedding_topk":
-    # Embedding top-k pulls HTTP-themed decoy functions from distractors.py
+    # Embedding top-k pulls HTTP-themed decoy function from distractors.py
     selected_keys = [
-      k for k in distractor_funcs if "preview_http_headers" in k or "format_endpoint_url" in k
+      k for k in distractor_funcs if "preview_http_headers" in k
     ]
     selected_blocks = [f"# {k}\n{distractor_funcs[k]}" for k in selected_keys]
   elif arm_id == "arm4_callgraph_slice":
@@ -824,7 +813,7 @@ def build_arm_context(
   elif arm_id == "arm5_unrelated_slice":
     # Equal-token unrelated utility slice from distractors.py (P4)
     selected_keys = [
-      k for k in distractor_funcs if "compute_window_digest" in k or "format_audit_record" in k
+      k for k in distractor_funcs if "compute_window_digest" in k
     ]
     selected_blocks = [f"# {k}\n{distractor_funcs[k]}" for k in selected_keys]
   else:
@@ -1214,8 +1203,6 @@ def main(argv: list[str] | None = None) -> int:
   ver_p.add_argument("--workflow-id", default="F1_01")
   ver_p.add_argument("--mode", choices=["gold", "codemod", "requests"], default="gold")
 
-  sub.add_parser("reproduce-paper", help="Reproduce paper metrics from frozen runs or baseline")
-
   args = parser.parse_args(argv)
   workflows = {w["id"]: w for w in get_benchmark_workflows()}
 
@@ -1262,15 +1249,6 @@ def main(argv: list[str] | None = None) -> int:
       allow_req = True
     res = run_workflow_sandbox(wf, fmap, allow_requests_reference=allow_req)
     print(json.dumps(res, indent=2))
-    return 0
-
-  if args.cmd == "reproduce-paper":
-    root = Path(__file__).resolve().parents[3]
-    ssot_path = root / "artifacts" / "metrics_ssot.json"
-    if ssot_path.exists():
-      print(ssot_path.read_text(encoding="utf-8"))
-      return 0
-    print(json.dumps({"status": "ready", "workflows": len(workflows)}))
     return 0
 
   return 1

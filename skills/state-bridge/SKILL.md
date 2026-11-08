@@ -21,7 +21,4 @@ description: Cross-function stateful call-graph slicer and deterministic Loopbac
    ```bash
    python3 skills/state-bridge/scripts/statebridge_core.py verify --workflow-id F1_01 --mode gold
    ```
-4. **Reproduce all paper tables and First-Divergence metrics from frozen real LLM runs**:
-   ```bash
-   python3 skills/state-bridge/scripts/statebridge_core.py reproduce-paper
-   ```
+
