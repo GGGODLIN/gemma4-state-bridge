@@ -8,7 +8,19 @@ import re
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-_PCT_RE = re.compile(r"\b\d+\.\d+%")
+_PCT_RE = re.compile(r"(?<![\\0-9])\b\d+\.\d+%(?![A-Za-z0-9_])")
+_PDF_BT_ET_RE = re.compile(r"BT[\s\S]*?ET")
+_PDF_TJ_STR_RE = re.compile(r"\(([^()\\]*(?:\\.[^()\\]*)*)\)")
+
+
+def _extract_pdf_text(pdf_bytes: bytes) -> str:
+  raw_latin = pdf_bytes.decode("latin-1", errors="ignore")
+  chunks: list[str] = []
+  for bt_m in _PDF_BT_ET_RE.finditer(raw_latin):
+    block = re.sub(r"\\[0-7]{3}", " ", bt_m.group(0))
+    for tm in _PDF_TJ_STR_RE.finditer(block):
+      chunks.append(tm.group(1))
+  return " ".join(chunks)
 
 
 def _fmt_pct(rate: float) -> str:
@@ -128,6 +140,13 @@ def verify_all_surfaces(root_dir: Path | None = None) -> dict[str, Any]:
       errors.append("paper/paper.pdf missing %PDF- header")
     if len(pdf_bytes) < 25000:
       errors.append(f"paper/paper.pdf too small ({len(pdf_bytes)} bytes)")
+    pdf_text = _extract_pdf_text(pdf_bytes)
+    for tok in expected_tokens:
+      if tok not in pdf_text:
+        errors.append(f"paper/paper.pdf extracted text missing SSOT token '{tok}'")
+    for found_pct in _PCT_RE.findall(pdf_text):
+      if found_pct not in allowed_pcts:
+        errors.append(f"paper/paper.pdf contains non-SSOT drifted percentage '{found_pct}'")
 
   # 3. Verify notebooks/reproduce_statebridge.ipynb
   nb_path = base / "notebooks" / "reproduce_statebridge.ipynb"
@@ -170,8 +189,6 @@ def verify_all_surfaces(root_dir: Path | None = None) -> dict[str, Any]:
     ):
       if req_str not in e_text:
         errors.append(f"explorer/index.html missing required string '{req_str}'")
-    if "5.96e-7" in e_text:
-      errors.append("explorer/index.html contains stale McNemar p-value 5.96e-7")
     for found_pct in _PCT_RE.findall(e_text):
       if found_pct not in allowed_pcts:
         errors.append(f"explorer/index.html contains non-SSOT drifted percentage '{found_pct}'")

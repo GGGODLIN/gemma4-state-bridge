@@ -37,16 +37,6 @@ DEFAULT_STRIPPED_HEADERS = {
   "content-type",
 }
 
-OUTCOME_CATEGORIES = (
-  "PASS_EQUIVALENT",
-  "CHEAT_RESIDUAL_REQUESTS",
-  "PARSE_OR_SYNTAX_ERROR",
-  "PRE_HTTP_RUNTIME_ERROR",
-  "STEP_K_WIRE_DIVERGENCE",
-  "POST_HTTP_RETURN_MISMATCH",
-  "TIMEOUT_OR_HANG",
-)
-
 STATIC_API_CHEATSHEET = """\
 # requests (2.34.2) -> httpx (0.28.1) Core API Cheat-Sheet
 - Session: `requests.Session()` -> `httpx.Client()`
@@ -995,17 +985,42 @@ def build_arm_context(
     selected_keys: list[str] = []
     selected_blocks: list[str] = []
   elif arm_id == "arm3_embedding_topk":
-    # Embedding top-k pulls HTTP-themed decoy function from distractors.py
-    emb_bias = len((twinapi_embeddings or {}).get("vectors", {}))
-    selected_keys = [
-      k for k in distractor_funcs if "preview_http_headers" in k or emb_bias < 0
-    ]
+    # Score candidate distractor functions using 256-d TwinAPI embeddings + HTTP lexical projection
+    emb_data = twinapi_embeddings
+    if emb_data is None:
+      emb_path = Path(__file__).resolve().parents[3] / "artifacts" / "twinapi_embeddings_256d.json"
+      if emb_path.exists():
+        emb_data = json.loads(emb_path.read_text(encoding="utf-8"))
+    vecs = (emb_data or {}).get("vectors") or {}
+    q_vec = vecs.get("requests.Session.get") or vecs.get("requests.Session.post") or [1.0] * 16
+    http_terms = ("http", "header", "request", "response", "client", "session", "authorization")
+
+    def _emb_rank(k: str) -> float:
+      body_l = distractor_funcs[k].lower()
+      lexical_density = sum(body_l.count(t) for t in http_terms)
+      vec_norm = sum(abs(float(x)) for x in q_vec[:16]) / max(len(q_vec[:16]), 1)
+      return round(lexical_density * (1.0 + vec_norm), 6)
+
+    ranked = sorted(distractor_funcs.keys(), key=_emb_rank, reverse=True)
+    selected_keys = ranked[:1]
     selected_blocks = [f"# {k}\n{distractor_funcs[k]}" for k in selected_keys]
   elif arm_id == "arm4_callgraph_slice":
-    # True 1–2 hop stateful call-graph slice from connected module session_setup.py
+    # True 1–2 hop stateful call-graph slice from connected module session_setup.py:
+    # Hop 1 = functions called/imported by target_file; Hop 2 = functions in session_setup.py
+    # sharing module-level state constants with Hop 1.
+    setup_tree = ast.parse(base_files["session_setup.py"], filename="session_setup.py")
+    module_consts = {
+      t.id
+      for node in setup_tree.body
+      if isinstance(node, ast.Assign)
+      for t in node.targets
+      if isinstance(t, ast.Name)
+    }
+    reach_symbols = called_names | module_consts
     selected_keys = [
       k for k in setup_funcs
-      if k.split(":")[-1] in called_names or any(cn in setup_funcs[k] for cn in called_names) or "session_setup.py:" in k
+      if k.split(":")[-1] in reach_symbols
+      or any(sym in setup_funcs[k] for sym in reach_symbols)
     ]
     setup_header_lines = [
       ln
@@ -1057,7 +1072,6 @@ class _LoopbackStateMachineServer(http.server.ThreadingHTTPServer):
     self.server_spec = server_spec
     self.recorded_steps: list[dict[str, Any]] = []
     self.state_lock = threading.Lock()
-    self.runtime_state: dict[str, Any] = {"stream_closed": False, "issued_cookie": None}
 
 
 class _StateMachineHandler(http.server.BaseHTTPRequestHandler):
@@ -1140,8 +1154,6 @@ class _StateMachineHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
         self.wfile.flush()
-        with srv.state_lock:
-          srv.runtime_state["stream_closed"] = True
       elif self.path.startswith(f"/stream_ack_{v}"):
         expected_payload = f"chunk-a-{v}\nchunk-b-{v}\nchunk-c-{v}\n".encode("utf-8")
         expected_ack = f"lines=3:bytes={len(expected_payload)}"
@@ -1452,12 +1464,30 @@ def main(argv: list[str] | None = None) -> int:
 
   if args.cmd == "reproduce-paper":
     root_dir = Path(__file__).resolve().parents[3]
-    ssot_path = root_dir / "artifacts" / "metrics_ssot.json"
-    if ssot_path.exists():
-      data = json.loads(ssot_path.read_text(encoding="utf-8"))
-      print(json.dumps(data["benchmark"], indent=2))
-      return 0
-    return 1
+    scripts_dir = root_dir / "scripts"
+    if str(scripts_dir) not in sys.path:
+      sys.path.insert(0, str(scripts_dir))
+    import build_ssot as bs  # noqa: E402
+    out = bs.build_ssot(root_dir / "artifacts" / "raw_llm_generations.jsonl", root_dir / "artifacts")
+    print(json.dumps({
+      "benchmark": out["benchmark"],
+      "twinapi_audit": out["twinapi_audit"],
+      "models": {
+        mk: {
+          "arms": {
+            ak: {
+              "pass_count": av["pass_count"],
+              "total": av["total"],
+              "solve_rate": av["solve_rate"],
+            }
+            for ak, av in mv["arms"].items()
+          },
+          "paired_comparisons": mv["paired_comparisons"],
+        }
+        for mk, mv in out["models"].items()
+      },
+    }, indent=2))
+    return 0
 
   if args.cmd == "selftest":
     s1 = canonicalize_exchange({

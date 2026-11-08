@@ -116,7 +116,7 @@ endobj
 endobj
 16 0 obj
 <<
-/Author (StateBridge Research Authors) /CreationDate (D:20261109072549+08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261109072549+08'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+/Author (StateBridge Research Authors) /CreationDate (D:20261109075226+08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261109075226+08'00') /Producer (ReportLab PDF Library - \(opensource\)) 
   /Subject (\(unspecified\)) /Title (StateBridge x TwinAPI: Resolving the Stateful False-Friend Paradox in Cross-Library Code Migration with Gemma 4) /Trapped /False
 >>
 endobj
@@ -127,24 +127,520 @@ endobj
 endobj
 18 0 obj
 <<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 2292
+/Length 4128
 >>
 stream
-GasapgMYb:&q0LUeB@2,ZQUo,70T%`3>6%W8J]u]MqJ7B$sI1?l7pECFHaG_fC,[c.ESld"9pD]lq>m.;s+hsRc>c7^[moX@SQ$P!<jXK9+#,mVY*H*[m']T//VG8TqB_A*r$m:i-Xerp4n<pT?t0Ha:IJ*"CJ5<$C6(Zq.3)__G<hqkA_2(M^P-/9=(ZoFRm;I@Op\($5^(`;pFV!LH"io>$]saAkUrTP$;#]'jZ^>9(11VfbF'](fBMo=1%sjej%P+os8Ij@\t&iCUCM+8$t(g4O@;<8G]-j7W_6]FJl\j]pEjn.%^-Zg"`34;^-bNhtT3_,#+EM64p$g)Gl+d1(#BWU&g.-QIs;M6t)1Q97-r%1^4T?4NXnU+Ygu'^W9V^kuJ^+D.V0>8,djP7".MT+V8s$\&tXS<5YK_F<R-$<ss*00^DFC.$&rPgk+inY=S^MGNtE4(o+<<14aUkUT/'i7Ms0p(hD%Gi/!^38E8XtQ^gu>LX.eM6S@t5_[Q-7MR*kpK11B_7T0&G47ENr+9QCg#-5`Z5Fna[r"b>o)qtCfc?IYlVqmXVrP"I)'miUXB5abm4HNP:<N!K-<K_Cl@jA(^[#s18`%J)K(%\VL$rV=Zqg:oNdcZC'Vjeb[NOM@:D+=NT9AA.?5qn\4lWNFA_"7DfX2;uu?.ZLYVkIJDjsZ63E95FK%tl_'^?L^`\&>e("D@Gq%QPO-L9f$1rdYrno-GU/-$?fl.Y`f&^<*oS/-e4u@?s?2`#F=(Gn:HiEfCuD8SbU+r,&9tXgJ9e"d%FE4B)KuF&[!E/aYeg:r,o3Q7ga/L_Xc&X\d$#]\f]Jl:C9FYGGn\9N&&j[;>V-*/^%ZN?VMDA5R<BEc"f$;7Ke0W*&f0@@lC6pTm;1Jqm/%P9#:UbX`&pad*@N`cXYY</Z-Ze*T>r6JY8?jm+Cl=lHXjX=fa"Gt4^6.Ldua^8B]MO>^h];%c$6#@(8GlQ-hQ(96n@%XJm]5i3t]IgQ:^YY'e!a9u"_hfnIh;PhSZnnNc@"73-;mrR/CFk\>Oas(/+I9O/]-sXt^j]b<Af'S4RjOa)$o8oJ$-3rUCh@J-AA)fQ^&pm("CD<4.%Q\@hT+oOaFgZB%<9o-5ZV9%=JuMut$ORlWi1j?X%1X;a!g,ckR9K4RB[.RcFoZW6B.&4LkNN0N[mnt?&;U`B9\nccEQ!JeaSZuD#L)`S6lB#q=M<)lISj)j\l3>H,KF:1aD!a$jtR?Plp\aEpL/L*d,00a9h0m$Ksus8(nZ7Ia#'@77@ug%hLhCaeHsMR*he3QJL[aTQ3+O;#2;\(^VYC+45IKrUGV2\b(CbD]92?d;E<70"PP)GSO2&(eIeSAPc3*hdXYWD%W6r/!Bk1k4*6)[<E(@KjQfWC2L"$)@=>%LZX&TU#T#/Q#A(0':'tu(PP7V<53;g-0LT[?B,GY?^%pZmmdBO8rIqjrq9hEuoXcJ^5L^*GO7,\\;mrSX/gR5F.^.;[n<:R@Z9lE^lXut??7(KQ8<s;"U^Y81P!_cf\Wb</XR`9%03IgT3EYn%-V6Fgp7iKPEjhJ(kI9qbXrI0.@3hq<SU]#_HY9bL@u_&Je][\N%N7Ep*4IGf+1XZqi`YUmc,O`6MU3DrA/-:CB]<Rm:'hFpY:TJ1ZkS8i5_U[\Q%RR_F[I6RORTm8p6[0lO@!!/^%0>l4Pm*q_QLE0n+W!%qL)M[B0Nn0`2EVlQ+E)fVcD3VB]6s3j06+YE)ZY\FQ/m%i9l7[+JIXWhMf+"fte(,h=Y<#JbANZ@,]!KiKFdcc^NsM*LbduH.L+T,cDZZ/qd,k+*m!'V19W'l?&e:Q.qGWYW?LK[c)R4h*NpI_4gQ4?cZ+F3Mbmd0l]74&I]=F-0S*nRhD#YE/;6f&U+$5%os>/[h$95a*-9_PI=8j#7$MT6nkVUK'tPYs6Jp=5HO5JefFK'?HCU;Lhsehq2HmNH55I1Xnc=:;+&LO5#9Z;C7FZg1_rcYWhU2c;ZU(uMAP0_goi0A?3NVQF_.'p1&LMtT#%c'Fm\Pn;OdNtHK41nfTbtQ']h)Fj0D4]3"="Sb!`t.8R0[sqRQ$GW]o&.BU8mHON29(d5!uuh'&4Q#%G`0VY]#YbGEqd5U(HZ+)Ank1J0cq3+i>08s54YJ<!?3lpqNu7f^08S9Ws]Os`W@0Q'#HTssB%n(H)8aQK)Bm#"BGT,qJ06(X3VEW(aS**`&tbFeRK$V(,<ND#K6)q0"'>Vt[!Ur\0Tj*eeDmJ+PGoNJcid8C6jH5iR:c%Bo]K^M9]VY>t35j@Y8#MlpP~>endstream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 52.8 701.2 cm
+q
+BT 1 0 0 1 0 22.5 Tm 3.2005 0 Td 19 TL /F2 15.5 Tf .043137 .043137 .043137 rg (StateBridge \327 TwinAPI: Resolving the Stateful False-Friend Paradox) Tj T* 76.88 0 Td (in Cross-Library Code Migration with Gemma 4) Tj T* -80.0805 0 Td ET
+Q
+Q
+q
+1 0 0 1 52.8 669.2 cm
+q
+BT 1 0 0 1 0 16.2 Tm 2.9325 0 Td 13 TL /F3 9.8 Tf .321569 .317647 .305882 rg (Gemma 4 Developer Agent Paper Track \227 Empirical Paper, Benchmark Resource \(StateBridge-Bench\), and Agent) Tj T* 241.2858 0 Td (Skill) Tj T* -244.2183 0 Td ET
+Q
+Q
+q
+1 0 0 1 52.8 493.4 cm
+q
+.976471 .976471 .968627 rg
+n 12 -6 482.4 175.8 re f*
+Q
+q
+BT 1 0 0 1 18 154.8 Tm 12.6 TL /F2 9 Tf .043137 .043137 .043137 rg (Abstract.) Tj /F1 9 Tf ( When developer agents migrate multi-file codebases between sibling libraries such as Python's ) Tj /F3 9 Tf (requests) Tj /F1 9 Tf  T* (\(2.34.2\) and ) Tj /F3 9 Tf (httpx) Tj /F1 9 Tf ( \(0.28.1\), they encounter the ) Tj /F2 9 Tf (Stateful False-Friend Paradox) Tj /F1 9 Tf (: 88.9% \(8/9\) of top-level functions and) Tj T* (83.3% \(10/12\) of core Session/Client methods share identical names, and 12 stateful false-friend API pairs exhibit a) Tj T* (mean 256-dimensional Gemini embedding cosine similarity of ) Tj /F2 9 Tf (0.873) Tj /F1 9 Tf (. Yet their multi-step runtime state machines) Tj T* (diverge silently on redirect following, cross-origin auth stripping, domain-scoped cookie jars, streaming context) Tj T* (lifecycles, and status-exception hierarchies. Across 270 live loopback HTTP state-machine executions \(240 real) Tj T* (Gemma 4 generations + 30 AST codemod runs\), deterministic AST codemods \(Arm 1\) pass 0.0% \(0/30\), while) Tj T* (target-only prompting \(Arm 2\) and 256-d embedding Top-K retrieval \(Arm 3\) both stall at ) Tj /F2 9 Tf (13.3% \(4/30\)) Tj /F1 9 Tf ( on) Tj T* (Gemma-4-31B-IT and ) Tj /F2 9 Tf (13.3% \(4/30\)) Tj /F1 9 Tf ( on Gemma-4-26B-A4B-IT. We introduce ) Tj /F2 9 Tf (StateBridge) Tj /F1 9 Tf ( \(Arm 4\), which extracts 1) Tj (\226) Tj (2) Tj T* (hop static call-graph state slices from cross-file session initializers. StateBridge raises multi-step wire-equivalence) Tj T* (solve rates to ) Tj /F2 9 Tf (90.0% \(27/30\)) Tj /F1 9 Tf ( on dense Gemma-4-31B-IT \(exact McNemar p = 2.4e-07\) and ) Tj /F2 9 Tf (96.7% \(29/30\)) Tj /F1 9 Tf ( on MoE) Tj T* (Gemma-4-26B-A4B-IT \(McNemar p = 6e-08\), while an equal-token unrelated control \(Arm 5\) remains at 16.7% \(5/30\)) Tj T* (and 13.3% \(4/30\).) Tj T* ET
+Q
+Q
+q
+1 0 0 1 52.8 479.4 cm
+Q
+q
+1 0 0 1 52.8 454.4 cm
+q
+BT 1 0 0 1 0 3 Tm 15 TL /F2 12 Tf .043137 .043137 .043137 rg (1. Introduction & The Stateful False-Friend Paradox) Tj T* ET
+Q
+Q
+q
+1 0 0 1 52.8 369.2 cm
+q
+.043137 .043137 .043137 rg
+BT 1 0 0 1 0 69.9 Tm /F1 9.3 Tf 13.2 TL (Migrating production code across sibling HTTP libraries is deceptively difficult for Large Language Models and) Tj T* (Retrieval-Augmented Generation \(RAG\) agents. Unlike cross-language translation where syntax forces structural rewrites,) Tj T* (sibling libraries in the same ecosystem intentionally mirror one another's surface ergonomics while redesigning implicit) Tj T* (stateful defaults. When a developer agent edits a workflow module \(workflow_steps.py\) without retrieving the cross-file) Tj T* (session factory \(session_setup.py\), local syntax checks and unit mocks pass while live multi-step wire exchanges fail) Tj T* (silently at Step k.) Tj T* ET
+Q
+Q
+q
+1 0 0 1 61.2 118.4 cm
+q
+489.6 0 0 244.8 0 0 cm
+/FormXob.c4abf052af9464fd58461fd38ac9e54f Do
+Q
+Q
+q
+1 0 0 1 52.8 90.4 cm
+q
+BT 1 0 0 1 0 13.7 Tm -0.083953 Tw 11 TL /F4 8.3 Tf .321569 .317647 .305882 rg (Figure 1:) Tj /F3 8.3 Tf ( 5-Arm wire-trace equivalence solve rates across 30 multi-step HTTP workflows \(270 live loopback runs\). StateBridge Call-Graph) Tj T* 0 Tw (Slicing \(Arm 4\) achieves 90.0% \(27/30\) on Gemma-4-31B-IT and 96.7% \(29/30\) on Gemma-4-26B-A4B-IT.) Tj T* ET
+Q
+Q
+q
+1 0 0 1 52.8 65.4 cm
+q
+.043137 .043137 .043137 rg
+BT 1 0 0 1 0 3 Tm /F2 12 Tf 15 TL (2. The TwinAPI Empirical Audit \(requests 2.34.2 vs. httpx 0.28.1\)) Tj T* ET
+Q
+Q
+ 
+endstream
 endobj
 19 0 obj
 <<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 2285
+/Length 8237
 >>
 stream
-Gat=-gN)%,&:O:Sm%^&,Bn-1LU2O`YV9X0\-e:uG-P&X410mIN8G`&S"\8oL49S3!1c@"6((6W9Foa3",_*?(?gIcA>JfJ'"--g###$6Kb<OqVo'GNWf#T+s1.\\H?gQkN#Z61F$EpYXk"I[f:&?o00J%Ero/n4Fq]q&!q\LYI.4-d)jV+0a-(ru$#>oT;K^MT#o<@\`SUc$/0420ViK-"o:3<4][bC*>m\(6`D8%ZsXGaN&Wr8fK>.1%oB[t195$VI&O;CXI[a9i&&#/GpLa,5t#F+(Nf,^H4J`T$GhoWU4DP/E',5`M#DC*G'2@1Q\m[t82d8Yn(DIbE4)WHE9.=8OBX*W[?A!Os/XuBR)\Z8B.D(dhW=7*$re'%t^3'*Lkb^PmCb:Z.Z7Y0RCd#/c9&VEXR:U1D'N:7Z?7IOPt`:=Z)-mCBNi(T.?f'gm.Sn0WJ^q!(0:ns5K0cg'>Q;F"m0$WlFU"j<,n_:/WqGo+e=DtU!q<7SU<cBrXqQL\m3rY3U3]d,AQ$@EK+Y2dDhWJg"Ien6F-Z=,jq&c1M)7g5]ni&t.b=)hRPk8rBeksWt85(Xg?G(p^X&%#eF>*j@?95StO^hWfcBX3tXnT((L2\oN&naljGH:7.7Q7iVG+N$^L(`+R9soPQ[e?@34[mPEF]$#r\fJgi`$9KMMgX7d=>Z;qQQ?TjA^!A9fi?cC#E3uid4KU[/IC%r>U'bdg+NXYr=[qB<^ks1:q'`_0h/9h9_<<TLXlY$[!.It*%_ME`^!CSI7)A!EM-I'"^PT1rs57cZmQ9&iNY!E;f#S09OuDR!P0h#`!"1Ol\&fPRc`799lk-DP2eCCYli5f$Z^'VP8kNPJE*"6N_,=B"*?QSd3d)Dd6-AJW2dBdRaYL\W!m-,QtlrLYm7>?2UG$u%<CEqWmWRn%+d>W[/i<nLH.720#p7qNJ<sn^><O@*@RB7eq'^J1SHY7#!0l.62J.2=_bJ>Fg:,\!Yr0dlh]L2I*EV<lu1(I#Z#$4XD.+Q4hVq^[ORGQ?PFH(G+lj`(^HX<B^0Zr^pA_inSF<qO*,0(g!&Uc;jq>WRe\!O#\N+Rc_mX#B!_*#Kh?RaTUK?qRP@V9ef;$,H-[Z:*%*Z5q9m9uET6,o+/1p>j.1uUH0W$ol@%h)!CsS^dgUKT_WmteR+dBk>)?m!E2;<D:=/Do\Sl8XBi!lg6Ao)n(5k"CCb#(:AtY]V1"qP&h23oDKT,LC:t8O/fpQdp<)ZM]9M!&uKZq\o()`b`gJ#\@<9%MJl6`]<EP&BCgU>;;#>^,8XQ*i]om*ZQ#FIuX*A@_u*Ir"<jPd5KKha\E+;^VCaFKarkm`5-s4g>7ijfVU:45HdIU=_25;u<m"I\GNfhs9ToLoKh#J.H?D_0,@K:E2u%PmW53cN@,AkW=!1S't^kriYO9W)CbZ4pNjKk!_9RP7*d"2jBiPaOQMe$i0o(j;"rfBC"h3]CECe&OjgZDDbpeMGFh%Z,tR/+.ulZdD]\5]>SIbs!I0kEHgT_%)Y*^,lc$ZFPgS9cjtH8W,QQ6DS)r`&j*.507Jal0.*QY;WUXB;\*hk0@9<aaG+YJR*p+k4t[HagJWC^O>gI$;E#Bp.p01)POV]ipjt-UbRUVR`E`Go=lWs-.tS)?g9k)9:AAV`<Af@kq73?FL.Ok-JZ'DL[W\C2a^A2i7S-UmWQH=E'23Y3fi!:S68huqC;O5c_=ATIStpKN63YODrA[&Z\ZJ^WW)7ET>B'q(2eF!ZEMZt9B<ks@'g5?-*i-P2PZ-q<ZiKCJ5A`Y+,g1U7j&n6!`cog!qfq(R:BJb(]e]:Ws9lBNcF`""L2HA4W"3?N?`5/41;[WSN<'8CH->#-Is_fX:iRPC\)4;/i,]d@CWX]^^3r?5`,-8Q,T/]Mh>&[B-eg`eWa&XII"t;bfGNCB0m_@OR5Qqh`6iF;3SF)%C\j\pK%OB^-#(D)X<Y:V+o_e.nsT=AisP99MH^RQ*2hWFgLtW?:>%8jU*0:c>k2>PUoDWA@7_iN2A,D"FR5i/7X9lm5o(nWD[f;ef2W/k&@l(O:='\km5B^Qe,Yk77<DD@q[bUDc`E`7R6le^HaFgjJ[/1bGT+TiVEn9C5T,*(NisL"glg_g?),[]c=)uq0&h(dJ6.4WOfO<9=GKamt<0CW&'T=5AXc1W\#%Q^=k>M+Fb)"^(I"F"@T_K$lJ0Yc?g,KLM^Ab<A0s3?JnZp?/8c`q!\G*dE*.G713>i>S[&Me8YL];:I8$.^jPA9:uXSI6V,i<96TVYD^nLp)d*c89t~>endstream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 52.8 712.8 cm
+q
+.043137 .043137 .043137 rg
+BT 1 0 0 1 0 17.1 Tm /F1 9.3 Tf 13.2 TL -0.071329 Tw (We inspected the runtime objects, parameter signatures, and docstrings of 15 paired APIs across requests 2.34.2 and httpx) Tj T* 0 Tw (0.28.1, embedding each descriptor into 256 dimensions via google/models/gemini-embedding-001.) Tj T* ET
+Q
+Q
+q
+1 0 0 1 60.84 418.8 cm
+q
+.164706 .470588 .839216 rg
+n 0 288 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 270 490.32 -18 re f*
+.94902 .945098 .92549 rg
+n 0 252 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 234 490.32 -18 re f*
+.94902 .945098 .92549 rg
+n 0 216 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 198 490.32 -18 re f*
+.94902 .945098 .92549 rg
+n 0 180 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 162 490.32 -18 re f*
+.94902 .945098 .92549 rg
+n 0 144 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 126 490.32 -18 re f*
+.94902 .945098 .92549 rg
+n 0 108 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 90 490.32 -18 re f*
+.94902 .945098 .92549 rg
+n 0 72 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 54 490.32 -18 re f*
+.94902 .945098 .92549 rg
+n 0 36 490.32 -18 re f*
+.988235 .988235 .984314 rg
+n 0 18 490.32 -18 re f*
+1 1 1 rg
+BT /F2 7.5 Tf 12 TL ET
+BT 1 0 0 1 6 277.5 Tm (ID) Tj T* ET
+BT 1 0 0 1 31.92 277.5 Tm (requests 2.34.2) Tj T* ET
+BT 1 0 0 1 162.96 277.5 Tm (httpx 0.28.1) Tj T* ET
+BT 1 0 0 1 286.8 277.5 Tm (Name Sim) Tj T* ET
+BT 1 0 0 1 328.56 277.5 Tm (Sig Iso) Tj T* ET
+BT 1 0 0 1 364.56 277.5 Tm (256-d Cos) Tj T* ET
+BT 1 0 0 1 409.2 277.5 Tm (False Friend) Tj T* ET
+BT 1 0 0 1 461.04 277.5 Tm (Family) Tj T* ET
+0 0 0 rg
+BT /F1 7.5 Tf 12 TL ET
+BT 1 0 0 1 6 259.5 Tm (P01) Tj T* ET
+BT 1 0 0 1 31.92 259.5 Tm (req.Session.post) Tj T* ET
+BT 1 0 0 1 162.96 259.5 Tm (httpx.Client.post) Tj T* ET
+BT 1 0 0 1 286.8 259.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 259.5 Tm (0.11) Tj T* ET
+BT 1 0 0 1 364.56 259.5 Tm (0.878) Tj T* ET
+BT 1 0 0 1 409.2 259.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 259.5 Tm (F1) Tj T* ET
+BT 1 0 0 1 6 241.5 Tm (P02) Tj T* ET
+BT 1 0 0 1 31.92 241.5 Tm (req.Session.get) Tj T* ET
+BT 1 0 0 1 162.96 241.5 Tm (httpx.Client.get) Tj T* ET
+BT 1 0 0 1 286.8 241.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 241.5 Tm (0.17) Tj T* ET
+BT 1 0 0 1 364.56 241.5 Tm (0.866) Tj T* ET
+BT 1 0 0 1 409.2 241.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 241.5 Tm (F1) Tj T* ET
+BT 1 0 0 1 6 223.5 Tm (P03) Tj T* ET
+BT 1 0 0 1 31.92 223.5 Tm (req.Session.request) Tj T* ET
+BT 1 0 0 1 162.96 223.5 Tm (httpx.Client.request) Tj T* ET
+BT 1 0 0 1 286.8 223.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 223.5 Tm (0.25) Tj T* ET
+BT 1 0 0 1 364.56 223.5 Tm (0.915) Tj T* ET
+BT 1 0 0 1 409.2 223.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 223.5 Tm (F2) Tj T* ET
+BT 1 0 0 1 6 205.5 Tm (P04) Tj T* ET
+BT 1 0 0 1 31.92 205.5 Tm (req.Session) Tj T* ET
+BT 1 0 0 1 162.96 205.5 Tm (httpx.Client) Tj T* ET
+BT 1 0 0 1 286.8 205.5 Tm (0.14) Tj T* ET
+BT 1 0 0 1 328.56 205.5 Tm (0.05) Tj T* ET
+BT 1 0 0 1 364.56 205.5 Tm (0.743) Tj T* ET
+BT 1 0 0 1 409.2 205.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 205.5 Tm (F2) Tj T* ET
+BT 1 0 0 1 6 187.5 Tm (P05) Tj T* ET
+BT 1 0 0 1 31.92 187.5 Tm (req.CookieJar.get_dict) Tj T* ET
+BT 1 0 0 1 162.96 187.5 Tm (httpx.Cookies) Tj T* ET
+BT 1 0 0 1 286.8 187.5 Tm (0.12) Tj T* ET
+BT 1 0 0 1 328.56 187.5 Tm (0.33) Tj T* ET
+BT 1 0 0 1 364.56 187.5 Tm (0.714) Tj T* ET
+BT 1 0 0 1 409.2 187.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 187.5 Tm (F3) Tj T* ET
+BT 1 0 0 1 6 169.5 Tm (P06) Tj T* ET
+BT 1 0 0 1 31.92 169.5 Tm (req.Session.put) Tj T* ET
+BT 1 0 0 1 162.96 169.5 Tm (httpx.Client.put) Tj T* ET
+BT 1 0 0 1 286.8 169.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 169.5 Tm (0.10) Tj T* ET
+BT 1 0 0 1 364.56 169.5 Tm (0.867) Tj T* ET
+BT 1 0 0 1 409.2 169.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 169.5 Tm (F3) Tj T* ET
+BT 1 0 0 1 6 151.5 Tm (P07) Tj T* ET
+BT 1 0 0 1 31.92 151.5 Tm (req.Response.iter_content) Tj T* ET
+BT 1 0 0 1 162.96 151.5 Tm (httpx.Response.iter_bytes) Tj T* ET
+BT 1 0 0 1 286.8 151.5 Tm (0.58) Tj T* ET
+BT 1 0 0 1 328.56 151.5 Tm (0.50) Tj T* ET
+BT 1 0 0 1 364.56 151.5 Tm (0.911) Tj T* ET
+BT 1 0 0 1 409.2 151.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 151.5 Tm (F4) Tj T* ET
+BT 1 0 0 1 6 133.5 Tm (P08) Tj T* ET
+BT 1 0 0 1 31.92 133.5 Tm (req.Response.close) Tj T* ET
+BT 1 0 0 1 162.96 133.5 Tm (httpx.Response.close) Tj T* ET
+BT 1 0 0 1 286.8 133.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 133.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 364.56 133.5 Tm (0.944) Tj T* ET
+BT 1 0 0 1 409.2 133.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 133.5 Tm (F4) Tj T* ET
+BT 1 0 0 1 6 115.5 Tm (P09) Tj T* ET
+BT 1 0 0 1 31.92 115.5 Tm (req.Response.raise_for_status) Tj T* ET
+BT 1 0 0 1 162.96 115.5 Tm (httpx.Response.raise_for_status) Tj T* ET
+BT 1 0 0 1 286.8 115.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 115.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 364.56 115.5 Tm (0.978) Tj T* ET
+BT 1 0 0 1 409.2 115.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 115.5 Tm (F5) Tj T* ET
+BT 1 0 0 1 6 97.5 Tm (P10) Tj T* ET
+BT 1 0 0 1 31.92 97.5 Tm (req.exceptions.HTTPError) Tj T* ET
+BT 1 0 0 1 162.96 97.5 Tm (httpx.HTTPStatusError) Tj T* ET
+BT 1 0 0 1 286.8 97.5 Tm (0.60) Tj T* ET
+BT 1 0 0 1 328.56 97.5 Tm (0.50) Tj T* ET
+BT 1 0 0 1 364.56 97.5 Tm (0.860) Tj T* ET
+BT 1 0 0 1 409.2 97.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 97.5 Tm (F5) Tj T* ET
+BT 1 0 0 1 6 79.5 Tm (P11) Tj T* ET
+BT 1 0 0 1 31.92 79.5 Tm (req.Session.delete) Tj T* ET
+BT 1 0 0 1 162.96 79.5 Tm (httpx.Client.delete) Tj T* ET
+BT 1 0 0 1 286.8 79.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 79.5 Tm (0.14) Tj T* ET
+BT 1 0 0 1 364.56 79.5 Tm (0.900) Tj T* ET
+BT 1 0 0 1 409.2 79.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 79.5 Tm (F1) Tj T* ET
+BT 1 0 0 1 6 61.5 Tm (P12) Tj T* ET
+BT 1 0 0 1 31.92 61.5 Tm (req.Session.patch) Tj T* ET
+BT 1 0 0 1 162.96 61.5 Tm (httpx.Client.patch) Tj T* ET
+BT 1 0 0 1 286.8 61.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 61.5 Tm (0.10) Tj T* ET
+BT 1 0 0 1 364.56 61.5 Tm (0.901) Tj T* ET
+BT 1 0 0 1 409.2 61.5 Tm (Yes) Tj T* ET
+BT 1 0 0 1 461.04 61.5 Tm (F1) Tj T* ET
+BT 1 0 0 1 6 43.5 Tm (P13) Tj T* ET
+BT 1 0 0 1 31.92 43.5 Tm (req.Session.head) Tj T* ET
+BT 1 0 0 1 162.96 43.5 Tm (httpx.Client.head) Tj T* ET
+BT 1 0 0 1 286.8 43.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 43.5 Tm (0.14) Tj T* ET
+BT 1 0 0 1 364.56 43.5 Tm (0.908) Tj T* ET
+BT 1 0 0 1 409.2 43.5 Tm (No) Tj T* ET
+BT 1 0 0 1 461.04 43.5 Tm (NONE) Tj T* ET
+BT 1 0 0 1 6 25.5 Tm (P14) Tj T* ET
+BT 1 0 0 1 31.92 25.5 Tm (req.Session.options) Tj T* ET
+BT 1 0 0 1 162.96 25.5 Tm (httpx.Client.options) Tj T* ET
+BT 1 0 0 1 286.8 25.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 25.5 Tm (0.14) Tj T* ET
+BT 1 0 0 1 364.56 25.5 Tm (0.909) Tj T* ET
+BT 1 0 0 1 409.2 25.5 Tm (No) Tj T* ET
+BT 1 0 0 1 461.04 25.5 Tm (NONE) Tj T* ET
+BT 1 0 0 1 6 7.5 Tm (P15) Tj T* ET
+BT 1 0 0 1 31.92 7.5 Tm (req.Response.json) Tj T* ET
+BT 1 0 0 1 162.96 7.5 Tm (httpx.Response.json) Tj T* ET
+BT 1 0 0 1 286.8 7.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 328.56 7.5 Tm (1.00) Tj T* ET
+BT 1 0 0 1 364.56 7.5 Tm (0.899) Tj T* ET
+BT 1 0 0 1 409.2 7.5 Tm (No) Tj T* ET
+BT 1 0 0 1 461.04 7.5 Tm (NONE) Tj T* ET
+q
+1 J
+1 j
+.764706 .760784 .717647 RG
+.4 w
+n 0 288 m 490.32 288 l S
+n 0 0 m 490.32 0 l S
+n 0 0 m 0 288 l S
+n 490.32 0 m 490.32 288 l S
+n 0 270 m 490.32 270 l S
+n 0 252 m 490.32 252 l S
+n 0 234 m 490.32 234 l S
+n 0 216 m 490.32 216 l S
+n 0 198 m 490.32 198 l S
+n 0 180 m 490.32 180 l S
+n 0 162 m 490.32 162 l S
+n 0 144 m 490.32 144 l S
+n 0 126 m 490.32 126 l S
+n 0 108 m 490.32 108 l S
+n 0 90 m 490.32 90 l S
+n 0 72 m 490.32 72 l S
+n 0 54 m 490.32 54 l S
+n 0 36 m 490.32 36 l S
+n 0 18 m 490.32 18 l S
+n 25.92 0 m 25.92 288 l S
+n 156.96 0 m 156.96 288 l S
+n 280.8 0 m 280.8 288 l S
+n 322.56 0 m 322.56 288 l S
+n 358.56 0 m 358.56 288 l S
+n 403.2 0 m 403.2 288 l S
+n 455.04 0 m 455.04 288 l S
+Q
+Q
+Q
+q
+1 0 0 1 52.8 410.8 cm
+Q
+q
+1 0 0 1 61.2 158.8 cm
+q
+489.6 0 0 252 0 0 cm
+/FormXob.c61db003f8a0860655f3bf655847b06e Do
+Q
+Q
+q
+1 0 0 1 52.8 130.8 cm
+q
+BT 1 0 0 1 0 13.7 Tm 11 TL /F4 8.3 Tf .321569 .317647 .305882 rg (Figure 2:) Tj /F3 8.3 Tf ( TwinAPI 256-d embedding cosine similarity across all 15 audited pairs. The 12 stateful false-friend pairs average 0.873 cosine) Tj T* (similarity, explaining why vector-RAG retrieves lexical HTTP decoys instead of state bridges.) Tj T* ET
+Q
+Q
+ 
+endstream
 endobj
 20 0 obj
 <<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 2365
+/Length 6944
 >>
 stream
-GauHM?#ugM&q0MXka/*bf`g[L"Kkt.Z?P\Hn'*3)mNf>ClTAS%b`HCD!fS0"qm8V9N#*<X%k3hM=mB%scD[R\$jD5I[/(3?!7slR\>;G./6>)j/R\AVgapeN4JTpE@C?E($(IUjp7hk0-fM;b!d1m!`@WmpfL0]$jVQ6j%1@'ka"f'nFWO%gAR2>ngq_P"=BG;6Xr`b!N3a3^W+)B`"^pp`[G;$0c=-MR/AKT3rJWrodW9hoT2g3t_%/?"d\]'N]mASueab`'&Qc8?"qQOl#.`H!3MoYk'SP._Q`*ejWWAt81oU[fSeX\bVBmcgYH<"A\6hWR/_'_Z"DQ?q1ABM6'#rjXG&r04)M05-f0p[YAq^Wc<tLZo5%U&JNo5?\UY5o4m&\5MfrLj9P*4FM&1bnU-eJTBNckq9<Yf6fm(dhZ_L0fI\u26R3%\-j^4e_1U9n5(O=c>RUQ4Ym/Vs$%#Fc=n1T"#C[0,qapb#`Se3fU2oaSKW*odb&Sqt$m>^S<b+ah/R:cQDfnAu[/2tiE*)Sm#`7H!U5&a5R^`mV\qH?8<XnEd`LR&Qk;So^Ur`BC]?q.lo!GcT7J8-!j_msF:Z;!)1L[SCFMh$$5%CsNA)Yl@M0anG$pq<a!%kLdG6Rb=GL@5r.j+cdk!KQ(e;Qel#.'ii++qqSM*Q#QmRSVC'hAh&4PcqCnF\:ceDUpaD_"_d3kD"8;V,.ZXmrd5($c3(pXOH74b,C.H(#0M5_)Z]d,%i`+<OrcCF&sbht<[HP@Gc^k.-I5W[[(^c)EkMHm'VErF30NNQi[@>F"YhF55+]Zj/S@?!jlK->Ne&KY%kN/9b]0`jDRL'*MW/`;4*5-6D[NamK)(51/jd,NO5AoQSJ9!bf(n60iTRWH-tKH<b9nE"2UFbP>f+aXq]N/JPZ8(*Uq+@S;,,VL3rsJ@WE8+"KrfE:>_/rF!Eg4L5%L2p&X(JoAZ^k9lm614Y6;<>Uq#c4,L#n[I9qloCPpZPqrY+knp%Dt<Q+DUSo^R41!E_<r#)orTI;olAo53#6i+OapFJ0lq(MaHEFr^[8E'\72(??heNNE\]/*^C;bKfmk*"<_"?olbV!TH5IACN+N">a]?+8_9J/kEM`FdSW4J_5\B%)[21qhOXH>,%g-5pG(f:rH!XY(.LMe8c"FX'TV)Kn8SRb\g)BJX7h]ep1l_66m@2k.(ELNp8f)MZldE@GdE/uiDTF%>3b[Te_GVAXM.29mglZ[DZMm(rDjK8^eG<<8G[MQ!7%?P*l<TqJG$$fGk['V",[i=8BiWiK+"&6c+GJH]-&H(,`_bNjRcF5e=EX(9:g]\Xlaj-S:k]=?s^dfSr:DQSM-S34\I?KX2h0='Y9!WJeWGKooj-ubj+"hWJ9nGRBQ#>tDtn>=a3]:'p5oD?KY[I%2]rnMs"hGqg9M%FQ6or-U@^s^0mWqpLNc^7qGn-mo+DP@A-!\95\`G)^-J^0Wjr#/Lg\nMH!P@^;hOYBfc6n^8IauDe$]2Ss6Vlp-#*qJ.Xft%Y#2#.lsmg9LRAFC=Y#g]&$3)Bgt$,t*CUh\BTMmQd9AJ/.Wcl.VH/=i>,lj*4-KQ\231QrsdouogW5rCG9@8P9D7$s`]`\/sE[g/MVmu_Q:,?GT,jkgoh6+S0!EKR(Bem:<"#:pO5)m<9e(R(W_PfEK8>_H6$"_ig_l*lQm7^".6>+_9VA%0U,jCY-f(Ij>JlW.K0GrMR'-6uuA<\4g]>qcGSEN%.iGV#Lso]$2qo2egsel1cM6cS'd7Wa:fX>.&8ZH*:nXDp"]T3Qe<]nVE,r'!RmV10Zt`o-n%4q<3"57W<#49e/_FrU]r3=c=\Sd9sg3.Sg_LV]@mP3mrY!eW5/@%cO61hM"'+:dfR%`\.)UI--@61=sr])-7M$fa(Q15u#Zmhch[O?(co_O.k>KJs'fZ25fkL<r#&'F<k!"!EQOgtFIEa+5q!a+,jU7tE@;o72r&!/H,hEhYJQ9GHP=&EGq^j>6ueMB18^$Jh9sG$:q"`(nX.9LSiK,06+9EnJs&/j&@KCXLJ2QO.)$;n'=Mc>%KsT=rd=G4hZGqE`Lrn^Dn8HKl(dLWD9VC]8-V-YO]8hCqW#kVlW_-Mmj)Z#)m#qdO"8hoG$l'`37mTX;5?HNuuuZleO3q-:TCW89F_CB%o]Ajr5)NIa/nEmtq7Xu*$`TQi(],X"]FTcu7m/4]/!Q"Z'3.ZaX!$rV9oJ8iA+k<*>Ok>d[.'fK;]=0E\;0R]p$(i6K`jb87^$R?M5[+j+%5`s!YG'f+i%H\A(;WZXmX`OXj=giY__U"LCC,:0&F^\^u\Gcn$'D;2e:$pCT$U5I#4nCEH^\[t+&;GQ(I."[JH7=p5lu2H11hZ~>endstream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 52.8 724.2 cm
+q
+BT 1 0 0 1 0 3 Tm 15 TL /F2 12 Tf .043137 .043137 .043137 rg (3. StateBridge-Bench & 5-Arm Ablation Results on Gemma 4) Tj T* ET
+Q
+Q
+q
+1 0 0 1 52.8 691.8 cm
+q
+.043137 .043137 .043137 rg
+BT 1 0 0 1 0 17.1 Tm /F1 9.3 Tf 13.2 TL (Table 2 reports the complete 5-arm ablation across Gemma-4-31B-IT \(dense\) and Gemma-4-26B-A4B-IT \(MoE\), alongside) Tj T* (exact two-sided McNemar p-values and 10,000-draw paired bootstrap 95% confidence intervals.) Tj T* ET
+Q
+Q
+q
+1 0 0 1 57.6 577.8 cm
+q
+.921569 .407843 .203922 rg
+n 0 108 496.8 -18 re f*
+.988235 .988235 .984314 rg
+n 0 90 496.8 -18 re f*
+.94902 .945098 .92549 rg
+n 0 72 496.8 -18 re f*
+.988235 .988235 .984314 rg
+n 0 54 496.8 -18 re f*
+.94902 .945098 .92549 rg
+n 0 36 496.8 -18 re f*
+.988235 .988235 .984314 rg
+n 0 18 496.8 -18 re f*
+1 1 1 rg
+BT /F2 8.2 Tf 12 TL ET
+BT 1 0 0 1 6 96.8 Tm (Experimental Arm) Tj T* ET
+BT 1 0 0 1 128.4 96.8 Tm (31B-IT Pass) Tj T* ET
+BT 1 0 0 1 200.4 96.8 Tm (31B-IT <thought>) Tj T* ET
+BT 1 0 0 1 285.36 96.8 Tm (26B-A4B Pass) Tj T* ET
+BT 1 0 0 1 357.36 96.8 Tm (26B-A4B <thought>) Tj T* ET
+BT 1 0 0 1 446.64 96.8 Tm (Prompt Tok) Tj T* ET
+0 0 0 rg
+BT /F1 8.2 Tf 12 TL ET
+BT 1 0 0 1 6 78.8 Tm (Arm 1: AST Codemod) Tj T* ET
+BT 1 0 0 1 128.4 78.8 Tm (0.0% \(0/30\)) Tj T* ET
+BT 1 0 0 1 200.4 78.8 Tm (0 chars) Tj T* ET
+BT 1 0 0 1 285.36 78.8 Tm (0.0% \(0/30\)) Tj T* ET
+BT 1 0 0 1 357.36 78.8 Tm (0 chars) Tj T* ET
+BT 1 0 0 1 446.64 78.8 Tm (0.0) Tj T* ET
+BT 1 0 0 1 6 60.8 Tm (Arm 2: Target File Only) Tj T* ET
+BT 1 0 0 1 128.4 60.8 Tm (13.3% \(4/30\)) Tj T* ET
+BT 1 0 0 1 200.4 60.8 Tm (4572.2 chars) Tj T* ET
+BT 1 0 0 1 285.36 60.8 Tm (13.3% \(4/30\)) Tj T* ET
+BT 1 0 0 1 357.36 60.8 Tm (8521.7 chars) Tj T* ET
+BT 1 0 0 1 446.64 60.8 Tm (497.7) Tj T* ET
+BT 1 0 0 1 6 42.8 Tm (Arm 3: 256-d Embedding Top-K) Tj T* ET
+BT 1 0 0 1 128.4 42.8 Tm (13.3% \(4/30\)) Tj T* ET
+BT 1 0 0 1 200.4 42.8 Tm (4764.6 chars) Tj T* ET
+BT 1 0 0 1 285.36 42.8 Tm (13.3% \(4/30\)) Tj T* ET
+BT 1 0 0 1 357.36 42.8 Tm (10005.8 chars) Tj T* ET
+BT 1 0 0 1 446.64 42.8 Tm (637.7) Tj T* ET
+BT 1 0 0 1 6 24.8 Tm (Arm 5: Equal-Token Unrelated) Tj T* ET
+BT 1 0 0 1 128.4 24.8 Tm (16.7% \(5/30\)) Tj T* ET
+BT 1 0 0 1 200.4 24.8 Tm (5647.3 chars) Tj T* ET
+BT 1 0 0 1 285.36 24.8 Tm (13.3% \(4/30\)) Tj T* ET
+BT 1 0 0 1 357.36 24.8 Tm (10473.7 chars) Tj T* ET
+BT 1 0 0 1 446.64 24.8 Tm (702.7) Tj T* ET
+BT /F2 8.2 Tf 12 TL ET
+BT 1 0 0 1 6 6.8 Tm (Arm 4: StateBridge \(Ours\)) Tj T* ET
+BT 1 0 0 1 128.4 6.8 Tm (90.0% \(27/30\)) Tj T* ET
+BT 1 0 0 1 200.4 6.8 Tm (8396.0 chars) Tj T* ET
+BT 1 0 0 1 285.36 6.8 Tm (96.7% \(29/30\)) Tj T* ET
+BT 1 0 0 1 357.36 6.8 Tm (14820.8 chars) Tj T* ET
+BT 1 0 0 1 446.64 6.8 Tm (799.9) Tj T* ET
+q
+1 J
+1 j
+.764706 .760784 .717647 RG
+.4 w
+n 0 108 m 496.8 108 l S
+n 0 0 m 496.8 0 l S
+n 0 0 m 0 108 l S
+n 496.8 0 m 496.8 108 l S
+n 0 90 m 496.8 90 l S
+n 0 72 m 496.8 72 l S
+n 0 54 m 496.8 54 l S
+n 0 36 m 496.8 36 l S
+n 0 18 m 496.8 18 l S
+n 122.4 0 m 122.4 108 l S
+n 194.4 0 m 194.4 108 l S
+n 279.36 0 m 279.36 108 l S
+n 351.36 0 m 351.36 108 l S
+n 440.64 0 m 440.64 108 l S
+Q
+Q
+Q
+q
+1 0 0 1 52.8 567.8 cm
+Q
+q
+1 0 0 1 61.2 344.6 cm
+q
+489.6 0 0 223.2 0 0 cm
+/FormXob.83b7d5314a37ced1e163f04adc41ff2a Do
+Q
+Q
+q
+1 0 0 1 52.8 316.6 cm
+q
+BT 1 0 0 1 0 13.7 Tm 11 TL /F4 8.3 Tf .321569 .317647 .305882 rg (Figure 3:) Tj /F3 8.3 Tf ( Per-family migration solve rates across the 5 stateful HTTP divergence families \(F1..F5\). StateBridge \(Arm 4\) achieves) Tj T* (83.3%) Tj (\226) Tj (100.0% across all five families on Gemma-4-26B-A4B-IT.) Tj T* ET
+Q
+Q
+q
+1 0 0 1 52.8 291.6 cm
+q
+BT 1 0 0 1 0 3 Tm 15 TL /F2 12 Tf .043137 .043137 .043137 rg (4. Paired Statistical Tests & Property-Based Verification \(P1..P4\)) Tj T* ET
+Q
+Q
+q
+1 0 0 1 57.6 160.6 cm
+q
+.105882 .686275 .478431 rg
+n 0 126 496.8 -18 re f*
+.988235 .988235 .984314 rg
+n 0 108 496.8 -18 re f*
+.94902 .945098 .92549 rg
+n 0 90 496.8 -18 re f*
+.988235 .988235 .984314 rg
+n 0 72 496.8 -18 re f*
+.94902 .945098 .92549 rg
+n 0 54 496.8 -18 re f*
+.988235 .988235 .984314 rg
+n 0 36 496.8 -18 re f*
+.94902 .945098 .92549 rg
+n 0 18 496.8 -18 re f*
+1 1 1 rg
+BT /F2 8 Tf 12 TL ET
+BT 1 0 0 1 6 115 Tm (Model) Tj T* ET
+BT 1 0 0 1 103.2 115 Tm (Comparison) Tj T* ET
+BT 1 0 0 1 186 115 Tm (Rate Diff) Tj T* ET
+BT 1 0 0 1 250.8 115 Tm (Discordant \(W/L\)) Tj T* ET
+BT 1 0 0 1 330 115 Tm (Exact McNemar p) Tj T* ET
+BT 1 0 0 1 412.8 115 Tm (95% Bootstrap CI) Tj T* ET
+0 0 0 rg
+BT /F1 8 Tf 12 TL ET
+BT 1 0 0 1 6 97 Tm (Gemma-4-31B-IT) Tj T* ET
+BT 1 0 0 1 103.2 97 Tm (Arm 4 vs Arm 2) Tj T* ET
+BT 1 0 0 1 186 97 Tm (+76.7%) Tj T* ET
+BT 1 0 0 1 250.8 97 Tm (23 / 0) Tj T* ET
+BT 1 0 0 1 330 97 Tm (2.4e-07) Tj T* ET
+BT 1 0 0 1 412.8 97 Tm ([60.0%, 90.0%]) Tj T* ET
+BT 1 0 0 1 6 79 Tm (Gemma-4-31B-IT) Tj T* ET
+BT 1 0 0 1 103.2 79 Tm (Arm 4 vs Arm 3) Tj T* ET
+BT 1 0 0 1 186 79 Tm (+76.7%) Tj T* ET
+BT 1 0 0 1 250.8 79 Tm (23 / 0) Tj T* ET
+BT 1 0 0 1 330 79 Tm (2.4e-07) Tj T* ET
+BT 1 0 0 1 412.8 79 Tm ([60.0%, 90.0%]) Tj T* ET
+BT 1 0 0 1 6 61 Tm (Gemma-4-31B-IT) Tj T* ET
+BT 1 0 0 1 103.2 61 Tm (Arm 4 vs Arm 5) Tj T* ET
+BT 1 0 0 1 186 61 Tm (+73.3%) Tj T* ET
+BT 1 0 0 1 250.8 61 Tm (23 / 1) Tj T* ET
+BT 1 0 0 1 330 61 Tm (2.98e-06) Tj T* ET
+BT 1 0 0 1 412.8 61 Tm ([53.3%, 90.0%]) Tj T* ET
+BT 1 0 0 1 6 43 Tm (Gemma-4-26B-A4B-IT) Tj T* ET
+BT 1 0 0 1 103.2 43 Tm (Arm 4 vs Arm 2) Tj T* ET
+BT 1 0 0 1 186 43 Tm (+83.3%) Tj T* ET
+BT 1 0 0 1 250.8 43 Tm (25 / 0) Tj T* ET
+BT 1 0 0 1 330 43 Tm (6e-08) Tj T* ET
+BT 1 0 0 1 412.8 43 Tm ([70.0%, 96.7%]) Tj T* ET
+BT 1 0 0 1 6 25 Tm (Gemma-4-26B-A4B-IT) Tj T* ET
+BT 1 0 0 1 103.2 25 Tm (Arm 4 vs Arm 3) Tj T* ET
+BT 1 0 0 1 186 25 Tm (+83.3%) Tj T* ET
+BT 1 0 0 1 250.8 25 Tm (25 / 0) Tj T* ET
+BT 1 0 0 1 330 25 Tm (6e-08) Tj T* ET
+BT 1 0 0 1 412.8 25 Tm ([70.0%, 96.7%]) Tj T* ET
+BT 1 0 0 1 6 7 Tm (Gemma-4-26B-A4B-IT) Tj T* ET
+BT 1 0 0 1 103.2 7 Tm (Arm 4 vs Arm 5) Tj T* ET
+BT 1 0 0 1 186 7 Tm (+83.3%) Tj T* ET
+BT 1 0 0 1 250.8 7 Tm (25 / 0) Tj T* ET
+BT 1 0 0 1 330 7 Tm (6e-08) Tj T* ET
+BT 1 0 0 1 412.8 7 Tm ([70.0%, 96.7%]) Tj T* ET
+q
+1 J
+1 j
+.764706 .760784 .717647 RG
+.4 w
+n 0 126 m 496.8 126 l S
+n 0 0 m 496.8 0 l S
+n 0 0 m 0 126 l S
+n 496.8 0 m 496.8 126 l S
+n 0 108 m 496.8 108 l S
+n 0 90 m 496.8 90 l S
+n 0 72 m 496.8 72 l S
+n 0 54 m 496.8 54 l S
+n 0 36 m 496.8 36 l S
+n 0 18 m 496.8 18 l S
+n 97.2 0 m 97.2 126 l S
+n 180 0 m 180 126 l S
+n 244.8 0 m 244.8 126 l S
+n 324 0 m 324 126 l S
+n 406.8 0 m 406.8 126 l S
+Q
+Q
+Q
+q
+1 0 0 1 52.8 152.6 cm
+Q
+q
+1 0 0 1 52.8 107 cm
+q
+BT 1 0 0 1 0 30.3 Tm 13.2 TL /F2 9.3 Tf .043137 .043137 .043137 rg (Conclusion.) Tj /F1 9.3 Tf ( High surface API similarity and dense embedding cosine \(0.873\) create a systematic trap for developer) Tj T* (agents migrating stateful workflows. By pairing 1) Tj (\226) Tj (2 hop static call-graph state slicing with a deterministic loopback HTTP) Tj T* (wire-trace oracle, StateBridge unlocks 90.0%) Tj (\226) Tj (96.7% accuracy on Gemma 4.) Tj T* ET
+Q
+Q
+ 
+endstream
 endobj
 xref
 0 21
@@ -167,12 +663,12 @@ xref
 0000487331 00000 n 
 0000487725 00000 n 
 0000487799 00000 n 
-0000490183 00000 n 
-0000492560 00000 n 
+0000491979 00000 n 
+0000500268 00000 n 
 trailer
 <<
 /ID 
-[<d09fe878a1a4a6596761e0e18032399d><d09fe878a1a4a6596761e0e18032399d>]
+[<a183a6ae02795ec77521fdd19c5173df><a183a6ae02795ec77521fdd19c5173df>]
 % ReportLab generated PDF document -- digest (opensource)
 
 /Info 16 0 R
@@ -180,5 +676,5 @@ trailer
 /Size 21
 >>
 startxref
-495017
+507264
 %%EOF

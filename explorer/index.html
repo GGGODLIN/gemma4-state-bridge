@@ -1054,9 +1054,10 @@
       <div class="code-split">
         <div class="code-pane">
           <div class="code-pane-header">
-            <span class="code-pane-title" id="left-code-title">Reference Source</span>
+            <span class="code-pane-title" id="left-code-title">Reference / Arm 4 Baseline</span>
             <div class="seg-group" id="ref-source-tabs">
-              <button type="button" class="seg-btn active" data-reftab="httpx_gold_source">Gold <code>httpx</code> Solution</button>
+              <button type="button" class="seg-btn active" data-reftab="arm4_migrated_code">Arm 4 (<code>StateBridge</code>)</button>
+              <button type="button" class="seg-btn" data-reftab="httpx_gold_source">Gold <code>httpx</code> Solution</button>
               <button type="button" class="seg-btn" data-reftab="requests_source">Original <code>requests</code></button>
               <button type="button" class="seg-btn" data-reftab="session_setup_httpx"><code>session_setup.py</code> (1-Hop Dependency)</button>
             </div>
@@ -1111,10 +1112,10 @@ window.__EXPLORER_BUNDLE__ = {"metrics_ssot":{"project":"StateBridge x TwinAPI",
 
       const state = {
         caseId: (cases[0] && cases[0].id) || "F1_01",
-        arm: "arm4_callgraph_slice",
+        arm: "arm3_embedding_topk",
         model: "gemma-4-26b-a4b-it",
         familyFilter: "ALL",
-        refTab: "httpx_gold_source"
+        refTab: "arm4_migrated_code"
       };
 
       function fmtPct(rate) {
@@ -1485,7 +1486,11 @@ window.__EXPLORER_BUNDLE__ = {"metrics_ssot":{"project":"StateBridge x TwinAPI",
         `;
 
         // Render 1-vs-1 Diff Split View
-        const refCode = activeCase[state.refTab] || "";
+        const arm4Key = `${state.model}:arm4_callgraph_slice`;
+        const arm4Run = (activeCase.runs && activeCase.runs[arm4Key]) || {};
+        const refCode = state.refTab === "arm4_migrated_code"
+          ? (arm4Run.migrated_code || activeCase.httpx_gold_source || "")
+          : (activeCase[state.refTab] || "");
         const candCode = run.migrated_code || "";
         const refLines = refCode.replace(/\r\n/g, "\n").split("\n");
         const candLines = candCode.replace(/\r\n/g, "\n").split("\n");

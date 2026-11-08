@@ -441,6 +441,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
     rightMargin=0.65 * inch,
     topMargin=0.65 * inch,
     bottomMargin=0.65 * inch,
+    pageCompression=0,
     title="StateBridge x TwinAPI: Resolving the Stateful False-Friend Paradox in Cross-Library Code Migration with Gemma 4",
     author="StateBridge Research Authors",
   )
@@ -604,8 +605,9 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
   if figs.get("fig3") and figs["fig3"].exists():
     story.append(Image(str(figs["fig3"]), width=6.8 * inch, height=3.5 * inch))
     story.append(Paragraph(
-      "<b>Figure 2:</b> TwinAPI 256-d embedding cosine similarity across all 15 audited pairs. The 12 stateful false-friend "
-      "pairs average 0.873 cosine similarity, explaining why vector-RAG retrieves lexical HTTP decoys instead of state bridges.",
+      f"<b>Figure 2:</b> TwinAPI 256-d embedding cosine similarity across all {twin['total_pairs_audited']} audited pairs. "
+      f"The {twin['stateful_false_friend_count']} stateful false-friend pairs average "
+      f"{twin['mean_false_friend_embedding_cosine_256d']:.3f} cosine similarity, explaining why vector-RAG retrieves lexical HTTP decoys instead of state bridges.",
       caption_style,
     ))
 
@@ -667,10 +669,11 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
   story.append(Spacer(1, 10))
 
   if figs.get("fig2") and figs["fig2"].exists():
+    f26_rates = [f_obj["pass_count"] / max(f_obj["total"], 1) for f_obj in a26["arm4_callgraph_slice"]["by_family"].values()]
     story.append(Image(str(figs["fig2"]), width=6.8 * inch, height=3.1 * inch))
     story.append(Paragraph(
-      "<b>Figure 3:</b> Per-family migration solve rates across the 5 stateful HTTP divergence families (F1..F5). "
-      "StateBridge (Arm 4) achieves 83.3%&ndash;100.0% across all five families on Gemma-4-26B-A4B-IT.",
+      f"<b>Figure 3:</b> Per-family migration solve rates across the 5 stateful HTTP divergence families (F1..F5). "
+      f"StateBridge (Arm 4) achieves {_fmt_pct(min(f26_rates))}&ndash;{_fmt_pct(max(f26_rates))} across all five families on Gemma-4-26B-A4B-IT.",
       caption_style,
     ))
 
@@ -738,9 +741,10 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
   story.append(t3)
   story.append(Spacer(1, 8))
   story.append(Paragraph(
-    "<b>Conclusion.</b> High surface API similarity and dense embedding cosine (0.873) create a systematic trap for "
-    "developer agents migrating stateful workflows. By pairing 1&ndash;2 hop static call-graph state slicing with a "
-    "deterministic loopback HTTP wire-trace oracle, StateBridge unlocks 90.0%&ndash;93.3% accuracy on Gemma 4.",
+    f"<b>Conclusion.</b> High surface API similarity and dense embedding cosine ({twin['mean_false_friend_embedding_cosine_256d']:.3f}) "
+    f"create a systematic trap for developer agents migrating stateful workflows. By pairing 1&ndash;2 hop static call-graph "
+    f"state slicing with a deterministic loopback HTTP wire-trace oracle, StateBridge unlocks "
+    f"{_fmt_pct(a31['arm4_callgraph_slice']['solve_rate'])}&ndash;{_fmt_pct(a26['arm4_callgraph_slice']['solve_rate'])} accuracy on Gemma 4.",
     body_style,
   ))
 
@@ -857,55 +861,6 @@ for fam in ("F1_REDIRECT_FOLLOW_DEFAULT", "F2_CROSS_ORIGIN_AUTH_STRIP", "F3_COOK
     "nbformat_minor": 5,
   }
   nb_path.write_text(json.dumps(nb_payload, indent=2, ensure_ascii=False), encoding="utf-8")
-
-
-def _fallback_explorer_template() -> str:
-  return """<!DOCTYPE html>
-<html lang="en" data-theme="light">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>StateBridge × TwinAPI — Interactive Wire-Trace & Call-Graph Explorer</title>
-<style>
-.viz-root {
-  color-scheme: light;
-  --surface-1: #fcfcfb;
-  --page-plane: #f9f9f7;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --status-good: #0ca30c;
-  --status-warn: #fab219;
-  --status-crit: #d03b3b;
-}
-:root[data-theme="dark"] .viz-root {
-  color-scheme: dark;
-  --surface-1: #1a1a19;
-  --page-plane: #0d0d0d;
-  --text-primary: #f0efec;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --gridline: #2c2c2a;
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --series-3: #199e70;
-}
-body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--page-plane); color: var(--text-primary); }
-</style>
-</head>
-<body class="viz-root">
-<h1>StateBridge × TwinAPI Interactive First-Divergence Explorer</h1>
-<p>Supports F1_REDIRECT_FOLLOW_DEFAULT and deep-linking via window.location.hash.</p>
-<script>
-window.__EXPLORER_BUNDLE__ = __EXPLORER_BUNDLE_JSON__;
-</script>
-</body>
-</html>
-"""
 
 
 def _build_readmes(ssot: dict[str, Any], base: Path) -> None:
@@ -1051,7 +1006,9 @@ def render_all_surfaces(root_dir: Path | None = None) -> dict[str, Any]:
 
   # 5. Interactive HTML Explorer
   tpl_path = base / "scripts" / "explorer_template.html"
-  tpl_html = tpl_path.read_text(encoding="utf-8") if tpl_path.exists() else _fallback_explorer_template()
+  if not tpl_path.exists():
+    tpl_path = ROOT / "scripts" / "explorer_template.html"
+  tpl_html = tpl_path.read_text(encoding="utf-8")
   bundle_obj = json.loads(bundle_raw)
   for case_item in bundle_obj.get("cases", []):
     for run_item in case_item.get("runs", {}).values():

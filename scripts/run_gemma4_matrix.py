@@ -145,8 +145,8 @@ def _call_gemma4_single(
     payload = json.dumps({
       "model": model_id,
       "messages": [{"role": "user", "content": prompt}],
-      "temperature": 0.0 if attempt == 1 else 0.2,
-      "max_tokens": 16384,
+      "temperature": 0.0,
+      "max_tokens": 8192 if attempt == 1 else 16384,
     }).encode("utf-8")
     limiter.wait_turn()
     t0 = time.monotonic()
