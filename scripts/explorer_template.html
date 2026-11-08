@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StateBridge × TwinAPI — Interactive Verification Workbench (Gemma 4)</title>
+  <style>
+    :root,
+    [data-theme="light"] {
+      --surface-1: #fcfcfb;
+      --surface-2: #f3f2ee;
+      --surface-3: #eae8e1;
+      --page-plane: #f9f9f7;
+      --text-primary: #0b0b0b;
+      --text-secondary: #52514e;
+      --text-muted: #898781;
+      --gridline: #e1e0d9;
+      --border-strong: #c8c6be;
+      --series-1: #2a78d6;
+      --series-2: #eb6834;
+      --series-3: #1baf7a;
+      --series-4: #7b52ab;
+      --series-5: #898781;
+      --status-good: #0ca30c;
+      --status-good-bg: rgba(12, 163, 12, 0.10);
+      --status-warn: #fab219;
+      --status-warn-bg: rgba(250, 178, 25, 0.14);
+      --status-crit: #d03b3b;
+      --status-crit-bg: rgba(208, 59, 59, 0.10);
+      --accent-soft: rgba(42, 120, 214, 0.10);
+      --diff-add-bg: rgba(12, 163, 12, 0.11);
+      --diff-del-bg: rgba(208, 59, 59, 0.11);
+      --shadow-sm: 0 1px 2px rgba(11, 11, 11, 0.04);
+      --shadow-md: 0 6px 18px rgba(11, 11, 11, 0.07);
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: "SFMono-Regular", ui-monospace, Menlo, Monaco, Consolas, monospace;
+    }
+
+    [data-theme="dark"] {
+      --surface-1: #1a1a19;
+      --surface-2: #232321;
+      --surface-3: #2d2d2a;
+      --page-plane: #0d0d0d;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --gridline: #2c2c2a;
+      --border-strong: #43433f;
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --series-4: #9d74cf;
+      --series-5: #898781;
+      --status-good: #28c928;
+      --status-good-bg: rgba(40, 201, 40, 0.14);
+      --status-warn: #fab219;
+      --status-warn-bg: rgba(250, 178, 25, 0.16);
+      --status-crit: #ea5454;
+      --status-crit-bg: rgba(234, 84, 84, 0.15);
+      --accent-soft: rgba(57, 135, 229, 0.15);
+      --diff-add-bg: rgba(40, 201, 40, 0.14);
+      --diff-del-bg: rgba(234, 84, 84, 0.15);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--page-plane);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--series-1);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--surface-1);
+      border-bottom: 1px solid var(--gridline);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: var(--accent-soft);
+      color: var(--series-1);
+      border: 1px solid var(--series-1);
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-jump {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: transparent;
+    }
+    .nav-jump:hover {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      background-color: var(--surface-2);
+      color: var(--text-primary);
+      border: 1px solid var(--gridline);
+      cursor: pointer;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+    .btn:hover {
+      background-color: var(--surface-3);
+      border-color: var(--border-strong);
+    }
+    .btn-primary {
+      background-color: var(--series-1);
+      color: #ffffff;
+      border-color: var(--series-1);
+    }
+    .btn-primary:hover {
+      opacity: 0.92;
+      background-color: var(--series-1);
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 24px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Executive Hero & KPI Ribbon */
+    .hero-card {
+      background-color: var(--surface-1);
+      border: 1px solid var(--gridline);
+      border-radius: 8px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .hero-headline {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.015em;
+    }
+
+    .hero-lead {
+      margin: 0;
+      color: var(--text-secondary);
+      max-width: 960px;
+      font-size: 13.5px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .kpi-tile {
+      background-color: var(--page-plane);
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-tile.highlight-primary {
+      border-left: 4px solid var(--series-1);
+    }
+    .kpi-tile.highlight-secondary {
+      border-left: 4px solid var(--series-2);
+    }
+    .kpi-tile.highlight-good {
+      border-left: 4px solid var(--status-good);
+    }
+    .kpi-tile.highlight-crit {
+      border-left: 4px solid var(--status-crit);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .kpi-foot {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    /* Section Cards */
+    .section-card {
+      background-color: var(--surface-1);
+      border: 1px solid var(--gridline);
+      border-radius: 8px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--gridline);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-desc {
+      margin: 2px 0 0 0;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    /* Two-column layout for Chart + Stats Table */
+    .analytics-split {
+      display: grid;
+      grid-template-columns: 0.88fr 1.25fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .analytics-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-box {
+      background: var(--page-plane);
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .svg-chart-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    /* Data tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      background: var(--page-plane);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      text-align: left;
+    }
+
+    table.data-table th,
+    table.data-table td {
+      padding: 8px 11px;
+      border-bottom: 1px solid var(--gridline);
+    }
+
+    table.data-table th {
+      background-color: var(--surface-2);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tbody tr:hover {
+      background-color: var(--surface-2);
+    }
+
+    table.data-table tbody tr.active-row {
+      background-color: var(--accent-soft);
+    }
+
+    .num {
+      font-family: var(--font-mono);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    /* Pills & Badges */
+    .pill-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background-color: var(--page-plane);
+      color: var(--text-secondary);
+      border: 1px solid var(--gridline);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .filter-pill:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+    .filter-pill.active {
+      background-color: var(--series-1);
+      color: #ffffff;
+      border-color: var(--series-1);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-pass {
+      background-color: var(--status-good-bg);
+      color: var(--status-good);
+      border: 1px solid var(--status-good);
+    }
+    .status-warn {
+      background-color: var(--status-warn-bg);
+      color: #b57c00;
+      border: 1px solid var(--status-warn);
+    }
+    [data-theme="dark"] .status-warn {
+      color: var(--status-warn);
+    }
+    .status-fail {
+      background-color: var(--status-crit-bg);
+      color: var(--status-crit);
+      border: 1px solid var(--status-crit);
+    }
+
+    /* Workbench Layout */
+    .workbench-controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      background-color: var(--page-plane);
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .workbench-controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .control-clusters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .seg-group {
+      display: inline-flex;
+      background-color: var(--surface-2);
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid var(--gridline);
+      flex-wrap: wrap;
+    }
+
+    .seg-btn {
+      padding: 5px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .seg-btn:hover {
+      color: var(--text-primary);
+    }
+    .seg-btn.active {
+      background-color: var(--surface-1);
+      color: var(--series-1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Case Matrix Selector */
+    .case-matrix {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .case-chip {
+      background-color: var(--page-plane);
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.12s ease;
+      text-align: left;
+    }
+    .case-chip:hover {
+      border-color: var(--border-strong);
+      background-color: var(--surface-2);
+    }
+    .case-chip.selected {
+      border-color: var(--series-1);
+      background-color: var(--accent-soft);
+      box-shadow: 0 0 0 1px var(--series-1);
+    }
+
+    .case-chip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .case-id {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    .case-family-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    .case-arm-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .arm-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .arm-dot.pass {
+      background-color: var(--status-good);
+    }
+    .arm-dot.fail {
+      background-color: var(--status-crit);
+    }
+    .arm-dot.current-arm {
+      outline: 2px solid var(--series-1);
+      outline-offset: 1px;
+    }
+
+    /* Context & Telemetry Strip */
+    .context-panel {
+      background-color: var(--page-plane);
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 960px) {
+      .context-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .slice-pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .fn-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      background-color: var(--surface-2);
+      border: 1px solid var(--gridline);
+      color: var(--text-primary);
+    }
+    .fn-badge.injected {
+      background-color: var(--status-good-bg);
+      border-color: var(--status-good);
+      color: var(--status-good);
+      font-weight: 600;
+    }
+    .fn-badge.decoy {
+      background-color: var(--status-warn-bg);
+      border-color: var(--status-warn);
+    }
+
+    /* 1-vs-1 Code Diff Split View */
+    .code-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 1024px) {
+      .code-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .code-pane {
+      background-color: var(--page-plane);
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .code-pane-header {
+      background-color: var(--surface-2);
+      border-bottom: 1px solid var(--gridline);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .code-pane-title {
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-pre {
+      margin: 0;
+      padding: 10px 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.55;
+      overflow-x: auto;
+      flex: 1;
+    }
+
+    .code-line {
+      display: flex;
+      padding: 0 12px;
+      white-space: pre;
+    }
+    .code-line.diff-changed {
+      background-color: var(--diff-add-bg);
+    }
+    .code-line.diff-ref-changed {
+      background-color: var(--diff-del-bg);
+    }
+
+    .ln-num {
+      width: 28px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      user-select: none;
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    .ln-text {
+      flex: 1;
+    }
+
+    /* First-Divergence Wire Inspector */
+    .wire-inspector {
+      background-color: var(--page-plane);
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .wire-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .wire-banner.pass {
+      background-color: var(--status-good-bg);
+      border: 1px solid var(--status-good);
+      color: var(--status-good);
+    }
+    .wire-banner.fail {
+      background-color: var(--status-crit-bg);
+      border: 1px solid var(--status-crit);
+      color: var(--status-crit);
+    }
+
+    .collapsed-steps-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background-color: var(--surface-2);
+      border: 1px solid var(--gridline);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .wire-diff-grid {
+      display: grid;
+      grid-template-columns: 130px 1fr 1fr;
+      border: 1px solid var(--gridline);
+      border-radius: 6px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .wire-cell {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--gridline);
+      border-right: 1px solid var(--gridline);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .wire-cell:nth-child(3n) {
+      border-right: none;
+    }
+    .wire-cell.header {
+      background-color: var(--surface-2);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+    .wire-cell.field-name {
+      font-weight: 600;
+      color: var(--text-secondary);
+      background-color: var(--surface-1);
+    }
+    .wire-cell.mismatch-expected {
+      background-color: var(--status-good-bg);
+      font-weight: 600;
+    }
+    .wire-cell.mismatch-actual {
+      background-color: var(--status-crit-bg);
+      font-weight: 600;
+    }
+
+    /* Tooltip */
+    #chart-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 999;
+      background-color: var(--surface-1);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 8px 11px;
+      font-size: 12px;
+      box-shadow: var(--shadow-md);
+      display: none;
+      max-width: 290px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-group">
+      <span class="brand-badge">StateBridge × TwinAPI</span>
+      <div>
+        <h1 class="brand-title">Gemma 4 Stateful Migration &amp; First-Divergence Workbench</h1>
+        <div class="brand-subtitle">Offline Self-Contained Research Explorer · 30 Multi-Step HTTP Workflows · 270 Evaluated Loopback Runs</div>
+      </div>
+    </div>
+    <div class="topbar-controls">
+      <button type="button" class="nav-jump" data-scroll="#section-arms">5-Arm Results</button>
+      <button type="button" class="nav-jump" data-scroll="#section-twinapi">TwinAPI Audit</button>
+      <button type="button" class="nav-jump" data-scroll="#section-workbench">First-Divergence Workbench</button>
+      <button type="button" class="btn" id="btn-copy-link" title="Copy deep link with window.location.hash">Copy Deep Link</button>
+      <button type="button" class="btn" id="btn-theme-toggle" aria-label="Toggle Light/Dark Theme">Theme: Light</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Executive Summary & KPI Ribbon -->
+    <section class="hero-card" aria-labelledby="hero-heading">
+      <div class="hero-header">
+        <div>
+          <h2 class="hero-headline" id="hero-heading">The Stateful False-Friend Paradox in Repository-Scale API Migration</h2>
+          <p class="hero-lead">
+            <strong>TwinAPI</strong> reveals why syntax-level codemods and target-file LLM prompts fail when migrating stateful Python HTTP workflows from <code>requests.Session</code> to <code>httpx.Client</code>: <strong>88.9%</strong> of top-level functions share identical names and <strong>0.873</strong> 256-D embedding cosine similarity, yet diverge silently on multi-hop redirect following (<code>F1_REDIRECT_FOLLOW_DEFAULT</code>), cross-origin auth stripping, cookie scoping, streaming context lifecycles, and exception hierarchy naming. <strong>StateBridge (Arm 4)</strong> resolves this via 1-hop AST call-graph slicing + deterministic loopback wire verification.
+          </p>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="kpi-ribbon">
+        <!-- Populated dynamically from metrics_ssot with static fallback -->
+        <div class="kpi-tile highlight-primary">
+          <span class="kpi-label">Gemma-4-26B-A4B-IT · Arm 4 (StateBridge)</span>
+          <div class="kpi-value"><span>93.3%</span> <span class="kpi-sub">(28/30)</span></div>
+          <div class="kpi-foot">vs 13.3% (4/30) Target-Only · McNemar <em>p</em> = 1.2e-7</div>
+        </div>
+        <div class="kpi-tile highlight-secondary">
+          <span class="kpi-label">Gemma-4-31B-IT · Arm 4 (StateBridge)</span>
+          <div class="kpi-value"><span>90.0%</span> <span class="kpi-sub">(27/30)</span></div>
+          <div class="kpi-foot">vs 13.3% (4/30) Target-Only · McNemar <em>p</em> = 2.4e-7</div>
+        </div>
+        <div class="kpi-tile highlight-crit">
+          <span class="kpi-label">TwinAPI Surface Overlap vs Codemod</span>
+          <div class="kpi-value"><span>88.9%</span> <span class="kpi-sub">/ 0.873 cos</span></div>
+          <div class="kpi-foot">83.3% Session/Client overlap · 0.0% (0/30) AST Codemod pass</div>
+        </div>
+        <div class="kpi-tile highlight-good">
+          <span class="kpi-label">Equal-Token Controls (Arm 3 &amp; Arm 5)</span>
+          <div class="kpi-value"><span>13.3%</span> <span class="kpi-sub">– 16.7%</span></div>
+          <div class="kpi-foot">Embedding Top-K (4/30) &amp; Unrelated Slice (5/30 on 31B, 4/30 on 26B)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: 5-Arm Solve Rate Chart & Statistical Comparison -->
+    <section class="section-card" id="section-arms" aria-labelledby="arms-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="arms-heading">1. 5-Arm Controlled Ablation &amp; Paired Statistical Verification</h2>
+          <p class="section-desc">Click any bar or table row to switch the active experimental arm in the Deep-Linked Workbench below.</p>
+        </div>
+        <div class="pill-bar" id="family-breakdown-Note">
+          <span class="status-badge status-pass">StateBridge Arm 4: +76.7 to +80.0 pp over Arm 2</span>
+        </div>
+      </div>
+
+      <div class="analytics-split">
+        <div class="chart-box">
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-swatch" style="background: var(--series-1);"></span> Gemma-4-26B-A4B-IT (MoE: 3.8B active / 25.2B total)</span>
+            <span class="legend-item"><span class="legend-swatch" style="background: var(--series-2);"></span> Gemma-4-31B-IT (Dense 30.7B)</span>
+          </div>
+          <div class="svg-chart-container" id="svg-arm-chart" role="img" aria-label="Horizontal grouped bar chart comparing 5 experimental arms across Gemma-4-26B-A4B-IT and Gemma-4-31B-IT"></div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="arm-stats-table">
+            <thead>
+              <tr>
+                <th>Experimental Arm</th>
+                <th class="num">26B-A4B Solve</th>
+                <th class="num">31B-IT Solve</th>
+                <th class="num">Arm 4 vs Arm Δ (26B)</th>
+                <th class="num">McNemar <em>p</em> (26B / 31B)</th>
+              </tr>
+            </thead>
+            <tbody id="arm-stats-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: TwinAPI Stateful False-Friend Map -->
+    <section class="section-card" id="section-twinapi" aria-labelledby="twinapi-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="twinapi-heading">2. TwinAPI Automated Surface &amp; Behavioral False-Friend Audit (15 Symbol Pairs)</h2>
+          <p class="section-desc">Select a divergence family pill to filter both the 15 audited symbol pairs and the 30 benchmark workflows below.</p>
+        </div>
+        <div class="pill-bar" id="family-filter-bar" role="group" aria-label="Filter by divergence family">
+          <button type="button" class="filter-pill active" data-family="ALL">ALL (15 Pairs / 30 Cases)</button>
+          <button type="button" class="filter-pill" data-family="F1_REDIRECT_FOLLOW_DEFAULT">F1_REDIRECT_FOLLOW_DEFAULT</button>
+          <button type="button" class="filter-pill" data-family="F2_CROSS_ORIGIN_AUTH_STRIP">F2_CROSS_ORIGIN_AUTH_STRIP</button>
+          <button type="button" class="filter-pill" data-family="F3_COOKIE_JAR_SCOPING">F3_COOKIE_JAR_SCOPING</button>
+          <button type="button" class="filter-pill" data-family="F4_STREAM_CONTEXT_LIFECYCLE">F4_STREAM_CONTEXT_LIFECYCLE</button>
+          <button type="button" class="filter-pill" data-family="F5_CLIENT_INIT_AND_STATUS_ERROR">F5_CLIENT_INIT_AND_STATUS_ERROR</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="twinapi-table">
+          <thead>
+            <tr>
+              <th>Pair</th>
+              <th><code>requests</code> Symbol</th>
+              <th><code>httpx</code> Symbol</th>
+              <th class="num">Short-Name Sim</th>
+              <th class="num">Sig Isomorphism</th>
+              <th class="num">256-D Cosine</th>
+              <th>Classification</th>
+              <th>Divergence Family &amp; Mechanism</th>
+            </tr>
+          </thead>
+          <tbody id="twinapi-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Deep-Linked First-Divergence Workbench -->
+    <section class="section-card" id="section-workbench" aria-labelledby="workbench-heading">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="workbench-heading">3. Deep-Linked First-Divergence Wire &amp; Call-Graph Workbench</h2>
+          <p class="section-desc">
+            State is synchronized bi-directionally with <code>window.location.hash</code> (<code>#case=F1_01&amp;arm=arm4_callgraph_slice&amp;model=gemma-4-26b-a4b-it</code>).
+          </p>
+        </div>
+        <div id="active-hash-pill" class="mono" style="color: var(--series-1); font-weight: 600;"></div>
+      </div>
+
+      <!-- Model & Arm Selector Controls -->
+      <div class="workbench-controls">
+        <div class="control-clusters">
+          <div class="control-group">
+            <span class="control-label">Gemma 4 Model:</span>
+            <div class="seg-group" id="model-selector" role="group" aria-label="Select Gemma 4 Model">
+              <button type="button" class="seg-btn active" data-model="gemma-4-26b-a4b-it">Gemma-4-26B-A4B-IT (MoE)</button>
+              <button type="button" class="seg-btn" data-model="gemma-4-31b-it">Gemma-4-31B-IT (Dense)</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">Experimental Arm:</span>
+            <div class="seg-group" id="arm-selector" role="group" aria-label="Select Experimental Arm">
+              <button type="button" class="seg-btn" data-arm="arm1_codemod">Arm 1: AST Codemod</button>
+              <button type="button" class="seg-btn" data-arm="arm2_target_only">Arm 2: Target-Only</button>
+              <button type="button" class="seg-btn" data-arm="arm3_embedding_topk">Arm 3: Embedding Top-K</button>
+              <button type="button" class="seg-btn active" data-arm="arm4_callgraph_slice">Arm 4: StateBridge Slice</button>
+              <button type="button" class="seg-btn" data-arm="arm5_unrelated_slice">Arm 5: Unrelated Control</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="run-status-pill"></div>
+      </div>
+
+      <!-- 30-Case Matrix Grid -->
+      <div class="case-matrix" id="case-matrix-grid" role="listbox" aria-label="Select Benchmark Workflow Case"></div>
+
+      <!-- Call-Graph Context & Gemma 4 Thinking Telemetry -->
+      <div class="context-panel" id="context-telemetry-panel"></div>
+
+      <!-- 1-vs-1 Diff Split View -->
+      <div class="code-split">
+        <div class="code-pane">
+          <div class="code-pane-header">
+            <span class="code-pane-title" id="left-code-title">Reference Source</span>
+            <div class="seg-group" id="ref-source-tabs">
+              <button type="button" class="seg-btn active" data-reftab="httpx_gold_source">Gold <code>httpx</code> Solution</button>
+              <button type="button" class="seg-btn" data-reftab="requests_source">Original <code>requests</code></button>
+              <button type="button" class="seg-btn" data-reftab="session_setup_httpx"><code>session_setup.py</code> (1-Hop Dependency)</button>
+            </div>
+          </div>
+          <pre class="code-pre" id="left-code-pre"></pre>
+        </div>
+
+        <div class="code-pane">
+          <div class="code-pane-header">
+            <span class="code-pane-title" id="right-code-title">Candidate Migrated Code</span>
+            <span class="mono" id="right-code-meta" style="color: var(--text-secondary);"></span>
+          </div>
+          <pre class="code-pre" id="right-code-pre"></pre>
+        </div>
+      </div>
+
+      <!-- First-Divergence Step Wire Inspector -->
+      <div class="wire-inspector" id="wire-inspector-container"></div>
+    </section>
+  </main>
+
+  <div id="chart-tooltip" role="tooltip"></div>
+
+  <script>
+window.__EXPLORER_BUNDLE__ = __EXPLORER_BUNDLE_JSON__;
+  </script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const bundle = window.__EXPLORER_BUNDLE__ || {};
+      const ssot = bundle.metrics_ssot || {};
+      const twinPairs = bundle.twinapi_pairs || [];
+      const cases = bundle.cases || [];
+
+      const ARM_META = {
+        arm1_codemod: { short: "Arm 1: AST Codemod", label: "Arm 1 — Deterministic AST Codemod", desc: "Syntax-only symbol rewrite (requests.Session → httpx.Client) without cross-file context." },
+        arm2_target_only: { short: "Arm 2: Target-Only", label: "Arm 2 — Target-File Only Prompt", desc: "LLM sees only workflow_steps.py; cross-file session_setup.py contract is hidden." },
+        arm3_embedding_topk: { short: "Arm 3: Embedding Top-K", label: "Arm 3 — Embedding Top-K Retrieval", desc: "256-D cosine similarity retrieves high-overlap HTTP header/cookie distractor functions." },
+        arm4_callgraph_slice: { short: "Arm 4: StateBridge Slice", label: "Arm 4 — StateBridge 1-Hop Call-Graph Slice", desc: "AST import + call-site resolution injects exact 1-hop helper definitions from session_setup.py." },
+        arm5_unrelated_slice: { short: "Arm 5: Unrelated Control", label: "Arm 5 — Equal-Token Unrelated Slice", desc: "Injects token-matched non-HTTP repository helper functions to rule out prompt-length effects." }
+      };
+
+      const ARM_ORDER = [
+        "arm4_callgraph_slice",
+        "arm5_unrelated_slice",
+        "arm3_embedding_topk",
+        "arm2_target_only",
+        "arm1_codemod"
+      ];
+
+      const state = {
+        caseId: (cases[0] && cases[0].id) || "F1_01",
+        arm: "arm4_callgraph_slice",
+        model: "gemma-4-26b-a4b-it",
+        familyFilter: "ALL",
+        refTab: "httpx_gold_source"
+      };
+
+      function fmtPct(rate) {
+        return (Number(rate || 0) * 100).toFixed(1) + "%";
+      }
+
+      function fmtSci(p) {
+        if (p === undefined || p === null) return "—";
+        const num = Number(p);
+        if (num < 0.0001) return num.toExponential(2);
+        return num.toFixed(4);
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      /* Hash routing synchronization via window.location.hash */
+      function parseHashState() {
+        const raw = (window.location.hash || "").replace(/^#/, "").trim();
+        if (!raw) return;
+        const params = new URLSearchParams(raw);
+        const cId = params.get("case");
+        const arm = params.get("arm");
+        const model = params.get("model");
+        const fam = params.get("family");
+
+        if (cId && cases.some((c) => c.id === cId)) {
+          state.caseId = cId;
+        }
+        if (arm && ARM_META[arm]) {
+          state.arm = arm;
+        }
+        if (model && (model === "gemma-4-26b-a4b-it" || model === "gemma-4-31b-it")) {
+          state.model = model;
+        }
+        if (fam) {
+          state.familyFilter = fam;
+        }
+      }
+
+      function writeHashState(replace) {
+        const hashStr = "#case=" + encodeURIComponent(state.caseId) +
+          "&arm=" + encodeURIComponent(state.arm) +
+          "&model=" + encodeURIComponent(state.model);
+        if (window.location.hash !== hashStr) {
+          if (replace && window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", hashStr);
+          } else {
+            window.location.hash = hashStr;
+          }
+        }
+        const pill = document.getElementById("active-hash-pill");
+        if (pill) {
+          pill.textContent = hashStr;
+        }
+      }
+
+      /* Render 5-Arm Horizontal Grouped Bar Chart + Table */
+      function renderArmsSection() {
+        const models = ssot.models || {};
+        const m26 = models["gemma-4-26b-a4b-it"];
+        const m31 = models["gemma-4-31b-it"];
+        if (!m26 || !m31) return;
+
+        const svgContainer = document.getElementById("svg-arm-chart");
+        const width = 620;
+        const rowHeight = 58;
+        const topPad = 24;
+        const bottomPad = 28;
+        const leftPad = 185;
+        const rightPad = 95;
+        const chartW = width - leftPad - rightPad;
+        const height = topPad + ARM_ORDER.length * rowHeight + bottomPad;
+
+        let svg = `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
+
+        // Vertical gridlines at 0%, 25%, 50%, 75%, 100%
+        [0, 0.25, 0.5, 0.75, 1.0].forEach((tick) => {
+          const x = leftPad + tick * chartW;
+          svg += `<line x1="${x}" y1="${topPad - 6}" x2="${x}" y2="${height - bottomPad}" stroke="var(--gridline)" stroke-dasharray="${tick === 0 ? "none" : "3,3"}" stroke-width="1" />`;
+          svg += `<text x="${x}" y="${height - 8}" text-anchor="middle" fill="var(--text-muted)" font-size="11" font-family="var(--font-mono)">${Math.round(tick * 100)}%</text>`;
+        });
+
+        ARM_ORDER.forEach((armKey, idx) => {
+          const yBase = topPad + idx * rowHeight;
+          const a26 = m26.arms[armKey];
+          const a31 = m31.arms[armKey];
+          const isSelected = state.arm === armKey;
+
+          const w26 = Math.max(3, a26.solve_rate * chartW);
+          const w31 = Math.max(3, a31.solve_rate * chartW);
+
+          if (isSelected) {
+            svg += `<rect x="4" y="${yBase - 4}" width="${width - 8}" height="${rowHeight - 4}" rx="5" fill="var(--accent-soft)" />`;
+          }
+
+          // Arm label on left
+          svg += `<text x="${leftPad - 10}" y="${yBase + 22}" text-anchor="end" fill="var(--text-primary)" font-size="12" font-weight="${isSelected ? "700" : "600"}">${escapeHtml(ARM_META[armKey].short)}</text>`;
+          svg += `<text x="${leftPad - 10}" y="${yBase + 37}" text-anchor="end" fill="var(--text-muted)" font-size="10.5" font-family="var(--font-mono)">${armKey}</text>`;
+
+          // Bar 1: Gemma-4-26B-A4B-IT (--series-1)
+          const yBar1 = yBase + 6;
+          const barH = 17;
+          svg += `<rect class="arm-bar" data-arm="${armKey}" data-model="gemma-4-26b-a4b-it" x="${leftPad}" y="${yBar1}" width="${w26}" height="${barH}" rx="2" fill="var(--series-1)" style="cursor:pointer;" />`;
+          svg += `<text x="${leftPad + w26 + 6}" y="${yBar1 + 12.5}" fill="var(--text-primary)" font-size="11.5" font-weight="700" font-family="var(--font-mono)">${fmtPct(a26.solve_rate)} (${a26.pass_count}/${a26.total})</text>`;
+
+          // 2px surface gap between grouped bars
+          const yBar2 = yBar1 + barH + 2;
+          svg += `<rect class="arm-bar" data-arm="${armKey}" data-model="gemma-4-31b-it" x="${leftPad}" y="${yBar2}" width="${w31}" height="${barH}" rx="2" fill="var(--series-2)" style="cursor:pointer;" />`;
+          svg += `<text x="${leftPad + w31 + 6}" y="${yBar2 + 12.5}" fill="var(--text-secondary)" font-size="11.5" font-weight="600" font-family="var(--font-mono)">${fmtPct(a31.solve_rate)} (${a31.pass_count}/${a31.total})</text>`;
+        });
+
+        svg += `</svg>`;
+        svgContainer.innerHTML = svg;
+
+        // Bind hover tooltip and click to bars
+        const tooltip = document.getElementById("chart-tooltip");
+        svgContainer.querySelectorAll(".arm-bar").forEach((rect) => {
+          rect.addEventListener("mouseenter", (ev) => {
+            const armK = rect.getAttribute("data-arm");
+            const modK = rect.getAttribute("data-model");
+            const armObj = models[modK].arms[armK];
+            const oc = armObj.outcome_counts || {};
+            tooltip.style.display = "block";
+            tooltip.innerHTML = `
+              <div style="font-weight:700; margin-bottom:3px;">${escapeHtml(ARM_META[armK].label)}</div>
+              <div class="mono" style="color:var(--series-1); margin-bottom:4px;">Model: ${escapeHtml(modK)}</div>
+              <div>Solve Rate: <strong>${fmtPct(armObj.solve_rate)} (${armObj.pass_count}/${armObj.total})</strong></div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">
+                PASS_EQUIVALENT: ${oc.PASS_EQUIVALENT || 0} · WIRE_DIVERGENCE: ${oc.STEP_K_WIRE_DIVERGENCE || 0} · PRE_HTTP_ERROR: ${oc.PRE_HTTP_RUNTIME_ERROR || 0}
+              </div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">Avg Prompt: ${armObj.mean_prompt_tokens} tok · Avg Thought: ${Math.round(armObj.mean_thought_chars)} chars</div>
+            `;
+            tooltip.style.left = (ev.clientX + 14) + "px";
+            tooltip.style.top = (ev.clientY + 14) + "px";
+          });
+          rect.addEventListener("mousemove", (ev) => {
+            tooltip.style.left = (ev.clientX + 14) + "px";
+            tooltip.style.top = (ev.clientY + 14) + "px";
+          });
+          rect.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none";
+          });
+          rect.addEventListener("click", () => {
+            state.arm = rect.getAttribute("data-arm");
+            state.model = rect.getAttribute("data-model");
+            updateAll();
+          });
+        });
+
+        // Populate Table
+        const tbody = document.getElementById("arm-stats-tbody");
+        const compMap = {
+          arm1_codemod: "arm4_vs_arm1",
+          arm2_target_only: "arm4_vs_arm2",
+          arm3_embedding_topk: "arm4_vs_arm3",
+          arm5_unrelated_slice: "arm4_vs_arm5"
+        };
+
+        let rowsHtml = "";
+        ARM_ORDER.forEach((armKey) => {
+          const a26 = m26.arms[armKey];
+          const a31 = m31.arms[armKey];
+          const compKey = compMap[armKey];
+          const c26 = compKey ? m26.paired_comparisons[compKey] : null;
+          const c31 = compKey ? m31.paired_comparisons[compKey] : null;
+          const isActive = state.arm === armKey;
+
+          const diffStr = c26
+            ? `+${fmtPct(c26.diff)} [${fmtPct(c26.ci95_low)}, ${fmtPct(c26.ci95_high)}]`
+            : "Reference (StateBridge)";
+          const pStr = c26 && c31
+            ? `p=${fmtSci(c26.mcnemar_p)} / ${fmtSci(c31.mcnemar_p)}`
+            : "—";
+
+          rowsHtml += `
+            <tr class="${isActive ? "active-row" : ""}" data-arm="${armKey}" style="cursor:pointer;">
+              <td>
+                <div style="font-weight:600;">${escapeHtml(ARM_META[armKey].short)}</div>
+                <div style="font-size:11px; color:var(--text-muted);">${escapeHtml(ARM_META[armKey].desc)}</div>
+              </td>
+              <td class="num"><strong>${fmtPct(a26.solve_rate)}</strong> (${a26.pass_count}/${a26.total})</td>
+              <td class="num"><strong>${fmtPct(a31.solve_rate)}</strong> (${a31.pass_count}/${a31.total})</td>
+              <td class="num">${escapeHtml(diffStr)}</td>
+              <td class="num">${escapeHtml(pStr)}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = rowsHtml;
+
+        tbody.querySelectorAll("tr[data-arm]").forEach((tr) => {
+          tr.addEventListener("click", () => {
+            state.arm = tr.getAttribute("data-arm");
+            updateAll();
+          });
+        });
+      }
+
+      /* Render TwinAPI 15 Symbol Pairs Table */
+      function renderTwinApiTable() {
+        const tbody = document.getElementById("twinapi-tbody");
+        const filtered = twinPairs.filter((p) => {
+          if (state.familyFilter === "ALL") return true;
+          return p.divergence_family === state.familyFilter;
+        });
+
+        tbody.innerHTML = filtered.map((p) => {
+          const badge = p.is_stateful_false_friend
+            ? `<span class="status-badge status-fail">Stateful False-Friend</span>`
+            : `<span class="status-badge status-pass">True Twin (Safe)</span>`;
+          return `
+            <tr>
+              <td class="mono">${escapeHtml(p.pair_id)}</td>
+              <td class="mono">${escapeHtml(p.req_symbol)}</td>
+              <td class="mono">${escapeHtml(p.httpx_symbol)}</td>
+              <td class="num">${Number(p.short_name_similarity).toFixed(2)}</td>
+              <td class="num">${Number(p.signature_isomorphism).toFixed(4)}</td>
+              <td class="num"><strong>${Number(p.embedding_cosine_256d).toFixed(4)}</strong></td>
+              <td>${badge}</td>
+              <td>
+                <div class="mono" style="font-weight:600; color:var(--series-1);">${escapeHtml(p.divergence_family)}</div>
+                <div style="font-size:12px; color:var(--text-secondary);">${escapeHtml(p.divergence_mechanism)}</div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        document.querySelectorAll("#family-filter-bar .filter-pill").forEach((btn) => {
+          btn.classList.toggle("active", btn.getAttribute("data-family") === state.familyFilter);
+        });
+      }
+
+      /* Get Run Record for (caseObj, model, arm) */
+      function getRunRecord(caseObj, modelId, armId) {
+        if (!caseObj || !caseObj.runs) return null;
+        if (armId === "arm1_codemod") {
+          return caseObj.runs["deterministic:arm1_codemod"] || null;
+        }
+        return caseObj.runs[`${modelId}:${armId}`] || null;
+      }
+
+      /* Render 30-Case Matrix & Active Workbench */
+      function renderWorkbench() {
+        // Update model & arm selector buttons
+        document.querySelectorAll("#model-selector .seg-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.getAttribute("data-model") === state.model);
+        });
+        document.querySelectorAll("#arm-selector .seg-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.getAttribute("data-arm") === state.arm);
+        });
+        document.querySelectorAll("#ref-source-tabs .seg-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.getAttribute("data-reftab") === state.refTab);
+        });
+
+        const visibleCases = cases.filter((c) => {
+          if (state.familyFilter === "ALL") return true;
+          return c.family === state.familyFilter;
+        });
+
+        if (visibleCases.length > 0 && !visibleCases.some((c) => c.id === state.caseId)) {
+          state.caseId = visibleCases[0].id;
+        }
+
+        const activeCase = cases.find((c) => c.id === state.caseId) || cases[0];
+        if (!activeCase) return;
+
+        // Render case grid
+        const matrixEl = document.getElementById("case-matrix-grid");
+        const armList = ["arm1_codemod", "arm2_target_only", "arm3_embedding_topk", "arm4_callgraph_slice", "arm5_unrelated_slice"];
+        matrixEl.innerHTML = visibleCases.map((c) => {
+          const isSel = c.id === activeCase.id;
+          const curRun = getRunRecord(c, state.model, state.arm);
+          const isPass = curRun && curRun.outcome_category === "PASS_EQUIVALENT";
+
+          const dotsHtml = armList.map((aKey) => {
+            const r = getRunRecord(c, state.model, aKey);
+            const pass = r && r.outcome_category === "PASS_EQUIVALENT";
+            const curClass = aKey === state.arm ? "current-arm" : "";
+            return `<span class="arm-dot ${pass ? "pass" : "fail"} ${curClass}" title="${aKey}: ${r ? r.outcome_category : "N/A"}"></span>`;
+          }).join("");
+
+          return `
+            <button type="button" class="case-chip ${isSel ? "selected" : ""}" data-case="${escapeHtml(c.id)}">
+              <div class="case-chip-top">
+                <span class="case-id">${escapeHtml(c.id)}</span>
+                <span class="status-badge ${isPass ? "status-pass" : "status-fail"}" style="padding:1px 5px; font-size:10px;">
+                  ${isPass ? "PASS" : "FAIL"}
+                </span>
+              </div>
+              <div class="case-family-tag">${escapeHtml(c.family.replace(/^F\d_/, ""))}</div>
+              <div class="case-arm-dots" aria-label="Arm 1 to Arm 5 status dots">${dotsHtml}</div>
+            </button>
+          `;
+        }).join("");
+
+        matrixEl.querySelectorAll(".case-chip").forEach((chip) => {
+          chip.addEventListener("click", () => {
+            state.caseId = chip.getAttribute("data-case");
+            updateAll();
+          });
+        });
+
+        const run = getRunRecord(activeCase, state.model, state.arm);
+        if (!run) return;
+
+        // Status pill in header
+        const statusPill = document.getElementById("run-status-pill");
+        if (run.outcome_category === "PASS_EQUIVALENT") {
+          statusPill.innerHTML = `<span class="status-badge status-pass">✓ PASS_EQUIVALENT · All Loopback Wire Steps Matched</span>`;
+        } else if (run.outcome_category === "PRE_HTTP_RUNTIME_ERROR") {
+          statusPill.innerHTML = `<span class="status-badge status-fail">✗ PRE_HTTP_RUNTIME_ERROR · (${escapeHtml(run.divergence_field || "runtime_exception")})</span>`;
+        } else {
+          statusPill.innerHTML = `<span class="status-badge status-fail">✗ STEP_K_WIRE_DIVERGENCE · Step ${run.first_divergence_step} (${escapeHtml(run.divergence_field)})</span>`;
+        }
+
+        // Render Call-Graph Context & Gemma 4 Thinking Telemetry
+        const ctxPanel = document.getElementById("context-telemetry-panel");
+        let injectedList = [];
+        let sliceLabel = "";
+        let badgeStyle = "";
+
+        if (state.arm === "arm4_callgraph_slice") {
+          injectedList = activeCase.arm4_functions || [];
+          sliceLabel = "StateBridge 1-Hop Call-Graph Slice Injected into Prompt:";
+          badgeStyle = "injected";
+        } else if (state.arm === "arm3_embedding_topk") {
+          injectedList = activeCase.arm3_functions || [];
+          sliceLabel = "Embedding Top-K Retrieved Symbols (High-Cosine Decoy):";
+          badgeStyle = "decoy";
+        } else if (state.arm === "arm5_unrelated_slice") {
+          injectedList = activeCase.arm5_functions || [];
+          sliceLabel = "Equal-Token Unrelated Control Symbols Injected:";
+          badgeStyle = "decoy";
+        } else {
+          injectedList = [];
+          sliceLabel = "No Cross-File Helper Functions Injected (Target File Only):";
+          badgeStyle = "";
+        }
+
+        const fnBadges = injectedList.length
+          ? injectedList.map((fn) => `<span class="fn-badge ${badgeStyle}">${escapeHtml(fn)}</span>`).join("")
+          : `<span class="fn-badge">0 external symbols injected (session_setup.py hidden)</span>`;
+
+        ctxPanel.innerHTML = `
+          <div>
+            <div class="control-label">${escapeHtml(activeCase.title)} · <span class="mono">${escapeHtml(activeCase.family)}</span></div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">${escapeHtml(sliceLabel)}</div>
+            <div class="slice-pill-list">${fnBadges}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; justify-content:center; gap:6px; border-left: 1px solid var(--gridline); padding-left: 16px;">
+            <div class="control-label">Gemma 4 Reasoning &amp; Output Telemetry</div>
+            <div class="mono" style="font-size:12.5px;">
+              <strong>&lt;thought&gt; Trace:</strong> ${Number(run.thought_chars || 0).toLocaleString()} chars
+              &nbsp;·&nbsp;
+              <strong>Visible Code:</strong> ${Number(run.visible_chars || 0).toLocaleString()} chars
+            </div>
+            <div style="font-size:11.5px; color:var(--text-muted);">
+              ${state.arm === "arm4_callgraph_slice"
+                ? "StateBridge grounds Gemma 4 reasoning in the exact 1-hop callee contract."
+                : "Without 1-hop call-graph grounding, extra thinking tokens cannot guess hidden repository invariants."}
+            </div>
+          </div>
+        `;
+
+        // Render 1-vs-1 Diff Split View
+        const refCode = activeCase[state.refTab] || "";
+        const candCode = run.migrated_code || "";
+        const refLines = refCode.replace(/\r\n/g, "\n").split("\n");
+        const candLines = candCode.replace(/\r\n/g, "\n").split("\n");
+
+        const refSet = new Set(refLines.map((l) => l.trim()).filter(Boolean));
+        const candSet = new Set(candLines.map((l) => l.trim()).filter(Boolean));
+
+        document.getElementById("left-code-pre").innerHTML = refLines.map((line, i) => {
+          const trimmed = line.trim();
+          const changed = state.refTab !== "session_setup_httpx" && trimmed && !candSet.has(trimmed);
+          return `<div class="code-line ${changed ? "diff-ref-changed" : ""}"><span class="ln-num">${i + 1}</span><span class="ln-text">${escapeHtml(line)}</span></div>`;
+        }).join("");
+
+        document.getElementById("right-code-meta").textContent = `${state.model} · ${state.arm}`;
+        document.getElementById("right-code-pre").innerHTML = candLines.map((line, i) => {
+          const trimmed = line.trim();
+          const changed = trimmed && !refSet.has(trimmed);
+          return `<div class="code-line ${changed ? "diff-changed" : ""}"><span class="ln-num">${i + 1}</span><span class="ln-text">${escapeHtml(line)}</span></div>`;
+        }).join("");
+
+        // Render First-Divergence Step Wire Inspector
+        renderWireInspector(activeCase, run);
+      }
+
+      function renderWireInspector(activeCase, run) {
+        const container = document.getElementById("wire-inspector-container");
+        if (run.outcome_category === "PASS_EQUIVALENT") {
+          container.innerHTML = `
+            <div class="wire-banner pass">
+              <span>✓ First-Divergence Wire Inspector: 0 Divergences Detected (PASS_EQUIVALENT)</span>
+              <span class="mono">Canonical HTTP Exchange Verified</span>
+            </div>
+            <div style="font-size:13px; color:var(--text-secondary);">
+              Every loopback HTTP request step emitted by <code>${escapeHtml(state.model)}</code> under <code>${escapeHtml(state.arm)}</code> matched the canonical <code>requests.Session</code> oracle across method, path, query tuple, custom gate/auth headers, scoped cookie jar, and JSON payload body, and satisfied <code>finalize_step_contract()</code>.
+            </div>
+          `;
+          return;
+        }
+
+        if (run.outcome_category === "PRE_HTTP_RUNTIME_ERROR") {
+          container.innerHTML = `
+            <div class="wire-banner fail">
+              <span>✗ First-Divergence Inspector: Pre-HTTP Runtime / Contract Error</span>
+              <span class="mono">Field: ${escapeHtml(run.divergence_field || "runtime_exception_before_http")}</span>
+            </div>
+            <div style="font-size:13px; color:var(--text-secondary);">
+              Execution raised an unhandled runtime exception before completing the loopback HTTP exchange (for example, passing removed keyword argument <code>allow_redirects=True</code> to <code>httpx.Client.post()</code>, catching <code>httpx.HTTPError</code> instead of <code>httpx.HTTPStatusError</code>, or failing response contract unpacking).
+            </div>
+          `;
+          return;
+        }
+
+        const k = Number(run.first_divergence_step || 1);
+        const collapsedLabel = k > 1
+          ? `Steps 1..${k - 1} matched canonical wire trace (0 divergences) — auto-collapsed`
+          : `Step 0 (Session Initialization) completed — diverged on HTTP Wire Step 1`;
+
+        const exp = run.expected_canonical_step || {};
+        const act = run.actual_canonical_step || {};
+        const fields = ["method", "path", "query", "headers", "cookies", "body_json", "body_text"];
+
+        let gridRows = `
+          <div class="wire-cell header">Canonical Field</div>
+          <div class="wire-cell header">Expected Oracle (requests.Session)</div>
+          <div class="wire-cell header">Actual Candidate (httpx.Client)</div>
+        `;
+
+        fields.forEach((f) => {
+          const expVal = exp[f] !== undefined ? JSON.stringify(exp[f], null, 2) : "—";
+          const actVal = act[f] !== undefined ? JSON.stringify(act[f], null, 2) : "—";
+          const isDiff = expVal !== actVal || run.divergence_field === f;
+          gridRows += `
+            <div class="wire-cell field-name">${escapeHtml(f)}${isDiff ? " ★" : ""}</div>
+            <div class="wire-cell ${isDiff ? "mismatch-expected" : ""}">${escapeHtml(expVal)}</div>
+            <div class="wire-cell ${isDiff ? "mismatch-actual" : ""}">${escapeHtml(actVal)}</div>
+          `;
+        });
+
+        container.innerHTML = `
+          <div class="wire-banner fail">
+            <span>✗ First-Divergence Step Wire Inspector — Diverged at Step ${k} on field <code>${escapeHtml(run.divergence_field)}</code></span>
+            <span class="mono">${escapeHtml(activeCase.id)} · ${escapeHtml(activeCase.family)}</span>
+          </div>
+          <div class="collapsed-steps-pill">
+            <span>●</span>
+            <span>${escapeHtml(collapsedLabel)}</span>
+          </div>
+          <div class="wire-diff-grid">
+            ${gridRows}
+          </div>
+        `;
+      }
+
+      function updateAll(replaceHash) {
+        writeHashState(Boolean(replaceHash));
+        renderArmsSection();
+        renderTwinApiTable();
+        renderWorkbench();
+      }
+
+      /* Event Listeners */
+      document.querySelectorAll("#model-selector .seg-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.model = btn.getAttribute("data-model");
+          updateAll();
+        });
+      });
+
+      document.querySelectorAll("#arm-selector .seg-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.arm = btn.getAttribute("data-arm");
+          updateAll();
+        });
+      });
+
+      document.querySelectorAll("#ref-source-tabs .seg-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.refTab = btn.getAttribute("data-reftab");
+          renderWorkbench();
+        });
+      });
+
+      document.querySelectorAll("#family-filter-bar .filter-pill").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.familyFilter = btn.getAttribute("data-family");
+          updateAll();
+        });
+      });
+
+      document.querySelectorAll(".nav-jump").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = document.querySelector(btn.getAttribute("data-scroll"));
+          if (target) target.scrollIntoView({ behavior: "smooth" });
+        });
+      });
+
+      document.getElementById("btn-theme-toggle").addEventListener("click", (ev) => {
+        const root = document.documentElement;
+        const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        ev.currentTarget.textContent = "Theme: " + (next === "dark" ? "Dark" : "Light");
+      });
+
+      document.getElementById("btn-copy-link").addEventListener("click", (ev) => {
+        const btn = ev.currentTarget;
+        const url = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            btn.textContent = "Copied Link!";
+            setTimeout(() => { btn.textContent = "Copy Deep Link"; }, 1400);
+          });
+        }
+      });
+
+      window.addEventListener("hashchange", () => {
+        parseHashState();
+        updateAll(true);
+      });
+
+      parseHashState();
+      updateAll(true);
+    })();
+  </script>
+</body>
+</html>
