@@ -11,7 +11,6 @@ SCRIPTS_DIR = ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
   sys.path.insert(0, str(SCRIPTS_DIR))
 
-import render_surfaces as render_mod  # noqa: E402
 import verify_ssot_consistency as verify_mod  # noqa: E402
 
 
@@ -95,13 +94,28 @@ def test_verify_ssot_consistency_passes_and_catches_mutations(tmp_path: Path):
 
   mut_writeup = tmp_path / "writeup" / "KAGGLE_WRITEUP.md"
   orig_text = mut_writeup.read_text(encoding="utf-8")
-  # Mutate 93.3% (28/30) to 99.9%
-  assert "93.3%" in orig_text
-  mut_writeup.write_text(orig_text.replace("93.3%", "99.9%", 1), encoding="utf-8")
+  # Mutate 90.0% (27/30) to 99.9%
+  assert "90.0%" in orig_text
+  mut_writeup.write_text(orig_text.replace("90.0%", "99.9%", 1), encoding="utf-8")
 
   bad_report = verify_mod.verify_all_surfaces(tmp_path)
   assert bad_report["ok"] is False
   assert any("KAGGLE_WRITEUP.md" in err for err in bad_report["errors"])
+
+  # Restore writeup and mutate notebooks/reproduce_statebridge.ipynb output percentage
+  mut_writeup.write_text(orig_text, encoding="utf-8")
+  mut_nb = tmp_path / "notebooks" / "reproduce_statebridge.ipynb"
+  orig_nb = mut_nb.read_text(encoding="utf-8")
+  mut_nb.write_text(orig_nb.replace("90.0%", "99.9%", 1), encoding="utf-8")
+  nb_report = verify_mod.verify_all_surfaces(tmp_path)
+  assert nb_report["ok"] is False
+  assert any("reproduce_statebridge.ipynb" in err for err in nb_report["errors"])
+  mut_nb.write_text(orig_nb, encoding="utf-8")
+
+  # Verify runs.jsonl contains zero host home paths
+  runs_text = (ROOT / "artifacts" / "runs.jsonl").read_text(encoding="utf-8")
+  assert str(Path.home()) not in runs_text
+  assert "/var/folders/" not in runs_text
 
   # Also test word-count cap violation (> 3000 words)
   mut_writeup.write_text(orig_text + "\n" + ("extraword " * 2500), encoding="utf-8")

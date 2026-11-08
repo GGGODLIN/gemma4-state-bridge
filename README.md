@@ -27,7 +27,7 @@ When autonomous coding agents migrate repositories across sibling libraries such
 | **`Arm 2`: Target File Only + Cheat-Sheet** | **13.3%** (`4/30`) | **13.3%** (`4/30`) | `497.7` |
 | **`Arm 3`: 256-d Embedding Top-K (Decoy)** | **13.3%** (`4/30`) | **13.3%** (`4/30`) | `637.7` |
 | **`Arm 5`: Equal-Token Unrelated Slice (Control)** | **16.7%** (`5/30`) | **13.3%** (`4/30`) | `702.7` |
-| **`Arm 4`: StateBridge Call-Graph Slice (Ours)** | **90.0%** (`27/30`, $p=2.4e-07$) | **93.3%** (`28/30`, $p=1.2e-07$) | `799.9` |
+| **`Arm 4`: StateBridge Call-Graph Slice (Ours)** | **90.0%** (`27/30`, $p=2.4e-07$) | **96.7%** (`29/30`, $p=6e-08$) | `799.9` |
 
 ---
 
@@ -35,7 +35,7 @@ When autonomous coding agents migrate repositories across sibling libraries such
 
 - [`writeup/KAGGLE_WRITEUP.md`](/writeup/KAGGLE_WRITEUP.md) — Official Kaggle Paper Track Writeup (`<= 3,000` words).
 - [`paper/paper.pdf`](/paper/paper.pdf) & [`paper/paper.md`](/paper/paper.md) — Full arXiv-formatted paper and vector/high-DPI figures.
-- [`notebooks/reproduce_statebridge.ipynb`](/notebooks/reproduce_statebridge.ipynb) — Self-contained executed Kaggle Notebook that replays all 270 runs against the live loopback HTTP state machine in `8.465s`.
+- [`notebooks/reproduce_statebridge.ipynb`](/notebooks/reproduce_statebridge.ipynb) — Self-contained executed Kaggle Notebook that replays all 270 runs against the live loopback HTTP state machine in `8.507s`.
 - [`explorer/index.html`](/explorer/index.html) — Single-file offline interactive HTML Explorer (`TwinAPI` map, 1-vs-1 diff split view, First-Divergence step inspector, `#case=<id>&arm=<arm>&model=<model>` deep-linking).
 - [`skills/state-bridge/SKILL.md`](/skills/state-bridge/SKILL.md) & [`skills/state-bridge/scripts/statebridge_core.py`](/skills/state-bridge/scripts/statebridge_core.py) — Reusable Agent Skill, 30-workflow `StateBridge-Bench` suite, loopback HTTP oracle, and `P1..P4` PBT invariants.
 - [`artifacts/`](/artifacts) — Frozen 240 real Gemma 4 generations (`raw_llm_generations.jsonl`), 270 live execution receipts (`runs.jsonl`), 256-d embeddings (`twinapi_embeddings_256d.json`), and single source of truth metrics (`metrics_ssot.json`).

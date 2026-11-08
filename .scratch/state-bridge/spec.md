@@ -61,3 +61,11 @@ We introduce **StateBridge × TwinAPI**, an empirical research study, reproducib
 
 - Architectural Decision Records are stored in `.scratch/state-bridge/decisions/0001-dual-track-frozen-generation-replay.md` and `.scratch/state-bridge/decisions/0002-stateful-false-friend-audit-and-arm5-control.md`.
 - Third-party attribution for `requests` (`Apache-2.0`) and `httpx` (`BSD-3-Clause`) metadata is documented in `THIRD_PARTY_NOTICES.md`.
+- **Empirical Findings Written Back at Closeout (`2026-11-09`)**:
+  - **TwinAPI Audit (`artifacts/twinapi_audit.json`)**: `requests==2.34.2` and `httpx==0.28.1` share `88.89%` (`8/9`) exact top-level function names, `83.33%` (`10/12`) core `Session`/`Client` method names, and `0.873` mean 256-d Gemini embedding cosine similarity across 12 stateful false-friend API pairs.
+  - **270-Run Live Loopback HTTP Evaluation (`artifacts/metrics_ssot.json`, replayed in `8.465s < 15s`)**:
+    - `Arm 1 (AST Codemod)`: `0.0%` (`0/30`).
+    - `Gemma-4-31B-IT (Dense)`: `Arm 2` `13.3%` (`4/30`), `Arm 3` `13.3%` (`4/30`), `Arm 5` `16.7%` (`5/30`), **`Arm 4 (StateBridge)` `90.0%` (`27/30`, exact McNemar $p = 2.4 \times 10^{-7}$ vs Arm 2/3, $p = 2.98 \times 10^{-6}$ vs Arm 5)**.
+    - `Gemma-4-26B-A4B-IT (MoE)`: `Arm 2` `13.3%` (`4/30`), `Arm 3` `13.3%` (`4/30`), `Arm 5` `13.3%` (`4/30`), **`Arm 4 (StateBridge)` `96.7%` (`29/30`, exact McNemar $p = 6.0 \times 10^{-8}$ vs Arm 2/3/5)**.
+  - **`<thought>` Budget Finding**: MoE `Gemma-4-26B-A4B-IT` invests longer internal `<thought>` traces on `Arm 4` (mean `14,724.5` chars vs `8,396.0` chars on `31B-IT`), requiring `max_tokens=16384` rather than `8192` on 6/240 prompts to avoid mid-thought or mid-fence length truncation.
+

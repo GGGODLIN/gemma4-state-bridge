@@ -53,19 +53,31 @@ def verify_all_surfaces(root_dir: Path | None = None) -> dict[str, Any]:
   m26 = ssot["models"]["gemma-4-26b-a4b-it"]
   allowed_pcts = _allowed_percentages(ssot)
 
+  p31_str = str(m31["paired_comparisons"]["arm4_vs_arm2"]["mcnemar_p"])
+  p26_str = str(m26["paired_comparisons"]["arm4_vs_arm2"]["mcnemar_p"])
+
   expected_tokens = [
     _fmt_pct(twin["top_level_exact_name_overlap_ratio"]),       # 88.9%
     _fmt_pct(twin["session_client_core_overlap_ratio"]),        # 83.3%
     f"{twin['mean_false_friend_embedding_cosine_256d']:.3f}",   # 0.873
     _fmt_pct(m31["arms"]["arm4_callgraph_slice"]["solve_rate"]),  # 90.0%
     f"{m31['arms']['arm4_callgraph_slice']['pass_count']}/30",    # 27/30
-    _fmt_pct(m26["arms"]["arm4_callgraph_slice"]["solve_rate"]),  # 93.3%
-    f"{m26['arms']['arm4_callgraph_slice']['pass_count']}/30",    # 28/30
+    _fmt_pct(m26["arms"]["arm4_callgraph_slice"]["solve_rate"]),  # 96.7%
+    f"{m26['arms']['arm4_callgraph_slice']['pass_count']}/30",    # 29/30
     _fmt_pct(m31["arms"]["arm2_target_only"]["solve_rate"]),      # 13.3%
     f"{m31['arms']['arm2_target_only']['pass_count']}/30",        # 4/30
     _fmt_pct(m31["arms"]["arm5_unrelated_slice"]["solve_rate"]),  # 16.7%
     f"{m31['arms']['arm5_unrelated_slice']['pass_count']}/30",    # 5/30
+    p31_str,
+    p26_str,
   ]
+
+  # 0. Verify runs.jsonl contains zero host path leaks if present
+  runs_path = base / "artifacts" / "runs.jsonl"
+  if runs_path.exists():
+    runs_raw = runs_path.read_text(encoding="utf-8")
+    if str(Path.home()) in runs_raw or "/var/folders/" in runs_raw:
+      errors.append("artifacts/runs.jsonl contains unredacted host filesystem paths")
 
   # 1. Verify writeup/KAGGLE_WRITEUP.md
   writeup_path = base / "writeup" / "KAGGLE_WRITEUP.md"
@@ -134,6 +146,9 @@ def verify_all_surfaces(root_dir: Path | None = None) -> dict[str, Any]:
     for tok in expected_tokens:
       if tok not in out_text:
         errors.append(f"notebooks/reproduce_statebridge.ipynb executed output missing SSOT token '{tok}'")
+    for found_pct in _PCT_RE.findall(out_text):
+      if found_pct not in allowed_pcts:
+        errors.append(f"notebooks/reproduce_statebridge.ipynb contains non-SSOT drifted percentage '{found_pct}'")
 
   # 4. Verify explorer/index.html
   exp_path = base / "explorer" / "index.html"
@@ -151,13 +166,15 @@ def verify_all_surfaces(root_dir: Path | None = None) -> dict[str, Any]:
       "F1_REDIRECT_FOLLOW_DEFAULT",
       f'"pass_count": {m26["arms"]["arm4_callgraph_slice"]["pass_count"]}',
       f'"pass_count": {m31["arms"]["arm4_callgraph_slice"]["pass_count"]}',
-      "2.4e-7",
-      "1.2e-7",
+      p26_str,
     ):
       if req_str not in e_text:
         errors.append(f"explorer/index.html missing required string '{req_str}'")
     if "5.96e-7" in e_text:
       errors.append("explorer/index.html contains stale McNemar p-value 5.96e-7")
+    for found_pct in _PCT_RE.findall(e_text):
+      if found_pct not in allowed_pcts:
+        errors.append(f"explorer/index.html contains non-SSOT drifted percentage '{found_pct}'")
 
   # 5. Verify README.md and README.zh-TW.md
   for r_name in ("README.md", "README.zh-TW.md"):

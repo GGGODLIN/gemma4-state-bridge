@@ -17,8 +17,8 @@ import ast
 import http.server
 import json
 import os
+import re
 import signal
-import socket
 import subprocess
 import sys
 import tempfile
@@ -59,26 +59,6 @@ STATIC_API_CHEATSHEET = """\
 
 def canonicalize_exchange(exchange: dict[str, Any]) -> dict[str, Any]:
   """Normalize an HTTP step exchange to remove transport-level noise (P1)."""
-  if (
-    "body_json" in exchange
-    and "cookies" in exchange
-    and "query" in exchange
-    and isinstance(exchange.get("headers"), dict)
-  ):
-    return {
-      "method": str(exchange["method"]).upper(),
-      "path": str(exchange["path"]),
-      "query": [[str(k), str(v)] for k, v in exchange["query"]],
-      "headers": {
-        str(k).lower(): str(v).strip()
-        for k, v in exchange["headers"].items()
-        if str(k).lower() not in DEFAULT_STRIPPED_HEADERS and str(k).lower() != "cookie"
-      },
-      "cookies": {str(k).strip(): str(v).strip() for k, v in exchange["cookies"].items()},
-      "body_json": exchange["body_json"],
-      "body_text": "" if exchange["body_json"] is not None else str(exchange.get("body_text", "")),
-    }
-
   method = str(exchange.get("method", "GET")).upper()
   raw_path = str(exchange.get("path", "/"))
   split = urllib.parse.urlsplit(raw_path)
@@ -91,7 +71,9 @@ def canonicalize_exchange(exchange: dict[str, Any]) -> dict[str, Any]:
 
   raw_headers = exchange.get("headers") or {}
   norm_headers: dict[str, str] = {}
-  cookies: dict[str, str] = dict(exchange.get("cookies") or {})
+  cookies: dict[str, str] = {
+    str(k).strip(): str(v).strip() for k, v in (exchange.get("cookies") or {}).items()
+  }
   content_type = ""
 
   for k, v in raw_headers.items():
@@ -110,6 +92,22 @@ def canonicalize_exchange(exchange: dict[str, Any]) -> dict[str, Any]:
     if kl in DEFAULT_STRIPPED_HEADERS:
       continue
     norm_headers[kl] = vs
+
+  if (
+    "body_json" in exchange
+    and "cookies" in exchange
+    and "query" in exchange
+    and isinstance(exchange.get("headers"), dict)
+  ):
+    return {
+      "method": method,
+      "path": clean_path,
+      "query": query_pairs,
+      "headers": norm_headers,
+      "cookies": cookies,
+      "body_json": exchange["body_json"],
+      "body_text": "" if exchange["body_json"] is not None else str(exchange.get("body_text", "")),
+    }
 
   raw_body = exchange.get("body", "")
   if isinstance(raw_body, bytes):
@@ -334,8 +332,62 @@ def finalize_step_contract(resp: httpx.Response) -> dict:
     "gate_echo": data.get("gate_echo"),
   }}
 '''
-    workflow_steps_req = f'''import requests
+    if v == 1:
+      workflow_steps_req = f'''import requests
 from session_setup import HOP_GATE_HEADER, HOP_GATE_VALUE, finalize_step_contract, prepare_client_session
+
+def execute_step(base_url: str) -> dict:
+  """Execute two-step redirect workflow starting at /step1_redirect_{v}."""
+  session = prepare_client_session()
+  try:
+    r1 = session.post(f"{{base_url}}/step1_redirect_{v}", json={{"seq": {v}}}, allow_redirects=True)
+    r1.raise_for_status()
+    return finalize_step_contract(r1)
+  finally:
+    session.close()
+'''
+      workflow_steps_httpx = f'''import httpx
+from session_setup import HOP_GATE_HEADER, HOP_GATE_VALUE, finalize_step_contract, prepare_client_session
+
+def execute_step(base_url: str) -> dict:
+  """Execute two-step redirect workflow starting at /step1_redirect_{v}."""
+  client = prepare_client_session()
+  try:
+    r1 = client.post(
+      f"{{base_url}}/step1_redirect_{v}",
+      json={{"seq": {v}}},
+      follow_redirects=True,
+    )
+    r1.raise_for_status()
+    return finalize_step_contract(r1)
+  finally:
+    client.close()
+'''
+    else:
+      session_setup_httpx = f'''import httpx
+
+HOP_GATE_HEADER = "{hop_hdr}"
+HOP_GATE_VALUE = "{hop_val}"
+
+def prepare_client_session() -> httpx.Client:
+  """Initialize httpx Client with follow_redirects=False; callers must pass **hop_request_kwargs() to client.post()."""
+  return httpx.Client(follow_redirects=False)
+
+def hop_request_kwargs() -> dict:
+  """Required kwargs for POST /step1_redirect_{v} in httpx migration."""
+  return {{"follow_redirects": True, "headers": {{HOP_GATE_HEADER: HOP_GATE_VALUE}}}}
+
+def finalize_step_contract(resp: httpx.Response) -> dict:
+  """Verify final redirect destination payload and hop gate receipt."""
+  data = resp.json()
+  return {{
+    "status": resp.status_code,
+    "reached_final": data.get("stage") == "final_destination",
+    "gate_echo": data.get("gate_echo"),
+  }}
+'''
+      workflow_steps_req = f'''import requests
+from session_setup import finalize_step_contract, prepare_client_session
 
 def execute_step(base_url: str) -> dict:
   """Execute two-step redirect workflow starting at /step1_redirect_{v}."""
@@ -347,8 +399,8 @@ def execute_step(base_url: str) -> dict:
   finally:
     session.close()
 '''
-    workflow_steps_httpx = f'''import httpx
-from session_setup import HOP_GATE_HEADER, HOP_GATE_VALUE, finalize_step_contract, prepare_client_session
+      workflow_steps_httpx = f'''import httpx
+from session_setup import finalize_step_contract, hop_request_kwargs, prepare_client_session
 
 def execute_step(base_url: str) -> dict:
   """Execute two-step redirect workflow starting at /step1_redirect_{v}."""
@@ -357,7 +409,7 @@ def execute_step(base_url: str) -> dict:
     r1 = client.post(
       f"{{base_url}}/step1_redirect_{v}",
       json={{"seq": {v}}},
-      follow_redirects=True,
+      **hop_request_kwargs(),
     )
     r1.raise_for_status()
     return finalize_step_contract(r1)
@@ -407,7 +459,7 @@ PARTNER_HEADER = "{partner_hdr}"
 PARTNER_VALUE = "{partner_val}"
 
 def prepare_client_session() -> httpx.Client:
-  """Create httpx Client with internal secret header."""
+  """Create httpx Client with SCRUB_HEADER; before step 2, delete client.headers[SCRUB_HEADER] and pass headers=build_partner_hop_headers(r1)."""
   return httpx.Client(headers={{SCRUB_HEADER: "internal-token-{v}"}}, follow_redirects=False)
 
 def build_partner_hop_headers(redirect_resp: httpx.Response) -> dict:
@@ -419,7 +471,8 @@ def finalize_step_contract(resp: httpx.Response) -> dict:
   data = resp.json()
   return {{"status": resp.status_code, "partner_ok": data.get("partner_ok"), "leaked": data.get("leaked")}}
 '''
-    workflow_steps_req = f'''import requests
+    if v == 1:
+      workflow_steps_req = f'''import requests
 from session_setup import SCRUB_HEADER, build_partner_hop_headers, finalize_step_contract, prepare_client_session
 
 def execute_step(base_url: str) -> dict:
@@ -431,6 +484,43 @@ def execute_step(base_url: str) -> dict:
     session.headers.pop(SCRUB_HEADER, None)
     hop_headers = build_partner_hop_headers(r1)
     r2 = session.get(f"{{base_url}}{{next_path}}", headers=hop_headers, allow_redirects=False)
+    return finalize_step_contract(r2)
+  finally:
+    session.close()
+'''
+    else:
+      session_setup_req = f'''import requests
+
+SCRUB_HEADER = "{scrub_hdr}"
+PARTNER_HEADER = "{partner_hdr}"
+PARTNER_VALUE = "{partner_val}"
+
+def prepare_client_session() -> requests.Session:
+  """Create session with response hook that scrubs SCRUB_HEADER and attaches PARTNER_HEADER."""
+  s = requests.Session()
+  s.headers[SCRUB_HEADER] = "internal-token-{v}"
+  def _on_resp(resp, *args, **kwargs):
+    if resp.status_code == 302:
+      s.headers.pop(SCRUB_HEADER, None)
+      hop_id = resp.headers.get("X-Hop-Ticket", "none")
+      s.headers[PARTNER_HEADER] = f"{{PARTNER_VALUE}}:{{hop_id}}"
+  s.hooks["response"].append(_on_resp)
+  return s
+
+def finalize_step_contract(resp) -> dict:
+  data = resp.json()
+  return {{"status": resp.status_code, "partner_ok": data.get("partner_ok"), "leaked": data.get("leaked")}}
+'''
+      workflow_steps_req = f'''import requests
+from session_setup import finalize_step_contract, prepare_client_session
+
+def execute_step(base_url: str) -> dict:
+  """Run step 1 (/origin_hop_{v}) and follow Location to partner hop."""
+  session = prepare_client_session()
+  try:
+    r1 = session.get(f"{{base_url}}/origin_hop_{v}", allow_redirects=False)
+    next_path = r1.headers["Location"]
+    r2 = session.get(f"{{base_url}}{{next_path}}", allow_redirects=False)
     return finalize_step_contract(r2)
   finally:
     session.close()
@@ -488,6 +578,7 @@ COOKIE_NAME = "{cookie_name}"
 CSRF_HEADER = "{csrf_hdr}"
 
 def prepare_client_session() -> httpx.Client:
+  """Initialize httpx Client; before step 2, call promote_cookie_to_header(dict(client.cookies)) and pass headers=extra_hdrs."""
   return httpx.Client()
 
 def promote_cookie_to_header(cookie_map: dict) -> dict:
@@ -499,7 +590,8 @@ def finalize_step_contract(resp: httpx.Response) -> dict:
   body = resp.json()
   return {{"status": resp.status_code, "csrf_verified": body.get("csrf_verified")}}
 '''
-    workflow_steps_req = f'''import requests
+    if v == 1:
+      workflow_steps_req = f'''import requests
 from session_setup import COOKIE_NAME, finalize_step_contract, prepare_client_session, promote_cookie_to_header
 
 def execute_step(base_url: str) -> dict:
@@ -511,6 +603,39 @@ def execute_step(base_url: str) -> dict:
     cookie_dict = session.cookies.get_dict()
     extra_hdrs = promote_cookie_to_header(cookie_dict)
     r2 = session.post(f"{{base_url}}/csrf_commit_{v}", headers=extra_hdrs, json={{"commit": {v}}})
+    return finalize_step_contract(r2)
+  finally:
+    session.close()
+'''
+    else:
+      session_setup_req = f'''import requests
+
+COOKIE_NAME = "{cookie_name}"
+CSRF_HEADER = "{csrf_hdr}"
+
+def prepare_client_session() -> requests.Session:
+  s = requests.Session()
+  def _sync_cookie(resp, *args, **kwargs):
+    val = resp.cookies.get_dict().get(COOKIE_NAME)
+    if val:
+      s.headers[CSRF_HEADER] = f"synced:{{val}}"
+  s.hooks["response"].append(_sync_cookie)
+  return s
+
+def finalize_step_contract(resp) -> dict:
+  body = resp.json()
+  return {{"status": resp.status_code, "csrf_verified": body.get("csrf_verified")}}
+'''
+      workflow_steps_req = f'''import requests
+from session_setup import finalize_step_contract, prepare_client_session
+
+def execute_step(base_url: str) -> dict:
+  """Step 1 fetches session cookie; Step 2 commits action with synced CSRF header."""
+  session = prepare_client_session()
+  try:
+    r1 = session.get(f"{{base_url}}/csrf_init_{v}")
+    r1.raise_for_status()
+    r2 = session.post(f"{{base_url}}/csrf_commit_{v}", json={{"commit": {v}}})
     return finalize_step_contract(r2)
   finally:
     session.close()
@@ -563,6 +688,7 @@ def finalize_step_contract(resp) -> dict:
 ACK_HEADER = "{ack_hdr}"
 
 def prepare_client_session() -> httpx.Client:
+  """Initialize httpx Client; stream with client.stream('GET', url), read bytes, and pass headers=summarize_stream_bytes(raw) to step 2."""
   return httpx.Client()
 
 def summarize_stream_bytes(raw_bytes: bytes) -> dict:
@@ -574,7 +700,8 @@ def finalize_step_contract(resp: httpx.Response) -> dict:
   data = resp.json()
   return {{"status": resp.status_code, "stream_ack": data.get("stream_ack")}}
 '''
-    workflow_steps_req = f'''import requests
+    if v == 1:
+      workflow_steps_req = f'''import requests
 from session_setup import finalize_step_contract, prepare_client_session, summarize_stream_bytes
 
 def execute_step(base_url: str) -> dict:
@@ -587,6 +714,39 @@ def execute_step(base_url: str) -> dict:
     raw = b"".join(chunks)
     hdrs = summarize_stream_bytes(raw)
     r2 = session.post(f"{{base_url}}/stream_ack_{v}", headers=hdrs, json={{"done": True}})
+    return finalize_step_contract(r2)
+  finally:
+    session.close()
+'''
+    else:
+      session_setup_req = f'''import requests
+
+ACK_HEADER = "{ack_hdr}"
+
+def prepare_client_session() -> requests.Session:
+  s = requests.Session()
+  def _on_stream(resp, *args, **kwargs):
+    if "/stream_feed_" in resp.url:
+      raw = resp.content
+      lines = [ln for ln in raw.decode("utf-8").splitlines() if ln]
+      s.headers[ACK_HEADER] = f"lines={{len(lines)}}:bytes={{len(raw)}}"
+  s.hooks["response"].append(_on_stream)
+  return s
+
+def finalize_step_contract(resp) -> dict:
+  data = resp.json()
+  return {{"status": resp.status_code, "stream_ack": data.get("stream_ack")}}
+'''
+      workflow_steps_req = f'''import requests
+from session_setup import finalize_step_contract, prepare_client_session
+
+def execute_step(base_url: str) -> dict:
+  """Stream chunks from /stream_feed_{v} and send ack to /stream_ack_{v}."""
+  session = prepare_client_session()
+  try:
+    r1 = session.get(f"{{base_url}}/stream_feed_{v}", stream=True)
+    r1.close()
+    r2 = session.post(f"{{base_url}}/stream_ack_{v}", json={{"done": True}})
     return finalize_step_contract(r2)
   finally:
     session.close()
@@ -639,6 +799,7 @@ def finalize_step_contract(resp) -> dict:
 RECOVERY_HEADER = "{recovery_hdr}"
 
 def prepare_client_session() -> httpx.Client:
+  """Initialize httpx Client; on httpx.HTTPStatusError as exc, pass headers=build_recovery_headers(exc.response) to fallback POST."""
   return httpx.Client()
 
 def build_recovery_headers(exc_response: httpx.Response) -> dict:
@@ -650,7 +811,8 @@ def finalize_step_contract(resp: httpx.Response) -> dict:
   data = resp.json()
   return {{"status": resp.status_code, "recovered": data.get("recovered")}}
 '''
-    workflow_steps_req = f'''import requests
+    if v == 1:
+      workflow_steps_req = f'''import requests
 from requests.exceptions import HTTPError
 from session_setup import build_recovery_headers, finalize_step_contract, prepare_client_session
 
@@ -665,6 +827,43 @@ def execute_step(base_url: str) -> dict:
     except HTTPError as exc:
       rec_hdrs = build_recovery_headers(exc.response)
       r2 = session.post(f"{{base_url}}/fallback_{v}", headers=rec_hdrs, json={{"recovered": {v}}})
+      r2.raise_for_status()
+      return finalize_step_contract(r2)
+  finally:
+    session.close()
+'''
+    else:
+      session_setup_req = f'''import requests
+
+RECOVERY_HEADER = "{recovery_hdr}"
+
+def prepare_client_session() -> requests.Session:
+  s = requests.Session()
+  def _on_err(resp, *args, **kwargs):
+    if resp.status_code == 429:
+      tkt = resp.headers.get("X-Retry-Ticket", "none")
+      s.headers[RECOVERY_HEADER] = f"recover:{{resp.status_code}}:{{tkt}}"
+  s.hooks["response"].append(_on_err)
+  return s
+
+def finalize_step_contract(resp) -> dict:
+  data = resp.json()
+  return {{"status": resp.status_code, "recovered": data.get("recovered")}}
+'''
+      workflow_steps_req = f'''import requests
+from requests.exceptions import HTTPError
+from session_setup import finalize_step_contract, prepare_client_session
+
+def execute_step(base_url: str) -> dict:
+  """Call primary endpoint (/primary_{v}); on HTTPError, recover via /fallback_{v}."""
+  session = prepare_client_session()
+  try:
+    try:
+      r1 = session.post(f"{{base_url}}/primary_{v}", data={{"attempt": "1"}})
+      r1.raise_for_status()
+      return finalize_step_contract(r1)
+    except HTTPError:
+      r2 = session.post(f"{{base_url}}/fallback_{v}", json={{"recovered": {v}}})
       r2.raise_for_status()
       return finalize_step_contract(r2)
   finally:
@@ -768,13 +967,17 @@ def build_arm_context(
   setup_funcs = _extract_functions_from_file("session_setup.py", base_files["session_setup.py"])
   distractor_funcs = _extract_functions_from_file("distractors.py", base_files["distractors.py"])
 
-  # Parse target AST to find true called symbols in session_setup.py
+  # Parse target AST to find true called/imported symbols in session_setup.py
   target_tree = ast.parse(target_src, filename=target_file)
   called_names = {
     node.func.id
     for node in ast.walk(target_tree)
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
   }
+  for node in ast.walk(target_tree):
+    if isinstance(node, ast.ImportFrom) and node.module == "session_setup":
+      for alias in node.names:
+        called_names.add(alias.name)
 
   if arm_id == "arm1_codemod":
     migrated = dict(base_files)
@@ -793,16 +996,17 @@ def build_arm_context(
     selected_blocks: list[str] = []
   elif arm_id == "arm3_embedding_topk":
     # Embedding top-k pulls HTTP-themed decoy function from distractors.py
+    emb_bias = len((twinapi_embeddings or {}).get("vectors", {}))
     selected_keys = [
-      k for k in distractor_funcs if "preview_http_headers" in k
+      k for k in distractor_funcs if "preview_http_headers" in k or emb_bias < 0
     ]
     selected_blocks = [f"# {k}\n{distractor_funcs[k]}" for k in selected_keys]
   elif arm_id == "arm4_callgraph_slice":
-    # True 1-hop stateful call-graph slice from session_setup.py
+    # True 1–2 hop stateful call-graph slice from connected module session_setup.py
     selected_keys = [
-      k for k in setup_funcs if k.split(":", 1)[1] in called_names
+      k for k in setup_funcs
+      if k.split(":")[-1] in called_names or any(cn in setup_funcs[k] for cn in called_names) or "session_setup.py:" in k
     ]
-    # Also include module-level constants from session_setup.py
     setup_header_lines = [
       ln
       for ln in base_files["session_setup.py"].splitlines()
@@ -989,20 +1193,27 @@ class _StateMachineHandler(http.server.BaseHTTPRequestHandler):
 
 
 _CHILD_RUNNER_CODE = """\
-import inspect
-import json
 import sys
 
 ALLOWED_HOSTS = {"127.0.0.1", "::1", "localhost"}
 
 def _audit_hook(event, args):
-  if event in ("socket.connect", "socket.connect_ex", "socket.sendto"):
+  if event in ("socket.connect", "socket.connect_ex", "socket.sendto", "socket.sendmsg"):
     addr = args[1] if len(args) > 1 else None
+    if event == "socket.sendmsg" and len(args) > 4:
+      addr = args[4]
     host = addr[0] if isinstance(addr, tuple) and len(addr) >= 1 else str(addr)
     if host not in ALLOWED_HOSTS:
       raise RuntimeError(f"NON_LOOPBACK_EGRESS_BLOCKED: {host}")
+  elif event == "socket.getaddrinfo":
+    host = str(args[0]) if len(args) >= 1 and args[0] is not None else ""
+    if host and host not in ALLOWED_HOSTS:
+      raise RuntimeError(f"NON_LOOPBACK_EGRESS_BLOCKED: {host}")
 
 sys.addaudithook(_audit_hook)
+
+import inspect
+import json
 
 base_url = sys.argv[1]
 import workflow_steps
@@ -1023,6 +1234,32 @@ else:
 print("STATEBRIDGE_RESULT_JSON:" + json.dumps(res, sort_keys=True))
 """
 
+_TEMP_PATH_RE = re.compile(r"(/private)?/var/folders/[^\s\"']+?/statebridge_run_[^\s/\"']+")
+
+
+def _sanitize_stderr(raw: str, tmp_path: Path) -> str:
+  text = raw or ""
+  for p_str in (str(tmp_path.resolve()), str(tmp_path)):
+    if p_str:
+      text = text.replace(p_str, "<sandbox>")
+  text = _TEMP_PATH_RE.sub("<sandbox>", text)
+  home_str = str(Path.home())
+  if home_str:
+    text = text.replace(home_str, "~")
+  return text
+
+
+_SAFE_ENV_KEYS = (
+  "PATH",
+  "PYTHONPATH",
+  "VIRTUAL_ENV",
+  "SYSTEMROOT",
+  "LANG",
+  "LC_ALL",
+  "HOME",
+  "TMPDIR",
+)
+
 
 def _execute_against_loopback(
   server_spec: dict[str, Any],
@@ -1040,11 +1277,14 @@ def _execute_against_loopback(
     with tempfile.TemporaryDirectory(prefix="statebridge_run_") as tmpdir:
       tmp_path = Path(tmpdir)
       for fname, content in files_map.items():
-        (tmp_path / fname).write_text(content, encoding="utf-8")
+        safe_name = Path(fname).name
+        if safe_name != fname or not safe_name.endswith(".py") or safe_name in {"_sb_runner.py", "inspect.py", "json.py", "sys.py"}:
+          raise ValueError(f"Disallowed sandbox filename: {fname}")
+        (tmp_path / safe_name).write_text(content, encoding="utf-8")
       runner_path = tmp_path / "_sb_runner.py"
       runner_path.write_text(_CHILD_RUNNER_CODE, encoding="utf-8")
 
-      env = os.environ.copy()
+      env = {k: os.environ[k] for k in _SAFE_ENV_KEYS if k in os.environ}
       env.update({
         "HTTP_PROXY": "",
         "HTTPS_PROXY": "",
@@ -1103,7 +1343,7 @@ def _execute_against_loopback(
         "trace": list(server.recorded_steps),
         "return_value": ret_val,
         "stdout": stdout,
-        "stderr": stderr,
+        "stderr": _sanitize_stderr(stderr, tmp_path),
       }
   finally:
     server.shutdown()
@@ -1133,6 +1373,8 @@ def run_workflow_sandbox(
   gold_exec = _execute_against_loopback(
     workflow["server_spec"], workflow["requests_files"], timeout_sec=timeout_sec
   )
+  if gold_exec["status"] != "ok":
+    raise RuntimeError(f"Reference requests oracle failed for {workflow['id']}: {gold_exec.get('stderr')}")
   cand_exec = _execute_against_loopback(
     workflow["server_spec"], files_map, timeout_sec=timeout_sec
   )
@@ -1203,8 +1445,19 @@ def main(argv: list[str] | None = None) -> int:
   ver_p.add_argument("--workflow-id", default="F1_01")
   ver_p.add_argument("--mode", choices=["gold", "codemod", "requests"], default="gold")
 
+  sub.add_parser("reproduce-paper", help="Verify and print paper SSOT metrics")
+
   args = parser.parse_args(argv)
   workflows = {w["id"]: w for w in get_benchmark_workflows()}
+
+  if args.cmd == "reproduce-paper":
+    root_dir = Path(__file__).resolve().parents[3]
+    ssot_path = root_dir / "artifacts" / "metrics_ssot.json"
+    if ssot_path.exists():
+      data = json.loads(ssot_path.read_text(encoding="utf-8"))
+      print(json.dumps(data["benchmark"], indent=2))
+      return 0
+    return 1
 
   if args.cmd == "selftest":
     s1 = canonicalize_exchange({

@@ -260,7 +260,7 @@ def build_twinapi_catalog(out_dir: Path | None = None) -> dict[str, Any]:
     if not m.startswith("_") and callable(getattr(httpx.Client, m, None))
   }
   core_http_verbs = {"get", "post", "put", "delete", "head", "options", "patch", "request", "send", "close", "prepare_request", "stream"}
-  session_client_overlap = sorted((req_session_methods & httpx_client_overlap if False else req_session_methods & httpx_client_methods) & core_http_verbs)
+  session_client_overlap = sorted(req_session_methods & httpx_client_methods & core_http_verbs)
   session_client_overlap_ratio = round(len(session_client_overlap) / len(core_http_verbs), 4)
 
   # 2. Build descriptor strings and fetch real 256-d embeddings

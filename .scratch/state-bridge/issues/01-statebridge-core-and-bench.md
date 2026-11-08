@@ -29,4 +29,9 @@
 
 - 2026-11-09 Preflight & Mode Lock: User authorized immediate unattended execution across Tickets `01..03` (`"你等等ticket開好就開工吧，我要睡了"`), locking `execution_mode=inline`, `testing_mode=tdd` (with full `P1..P4` Conditional PBT), `best_of_n=none`.
 - 2026-11-09 Ticket 01 Verification: Observed RED (`9 failed in 0.09s`), then implemented `statebridge_core.py` and verified GREEN (`9 passed in 18.24s` in `tests/test_statebridge_core.py`, plus `selftest` exit 0 in stdlib Python). All 30 workflows pass `PASS_EQUIVALENT` under reference `requests` and `httpx_gold_files`, and diverge deterministically under `Arm 1` AST Codemod.
+- 2026-11-09 Closeout Review (`python-reviewer` & `security-reviewer`):
+  - `Acceptance-miss — build_arm_context() constructs all 5 arms + CLI subcommand reproduce-paper + 0 orphan processes assertion → build_arm_context() computed called_names without filtering Arm 4 by call-graph reachability, main() lacked reproduce-paper subcommand, and timeout test did not assert 0 surviving child PIDs`: Confirmed (`G3`). Fixing in `statebridge_core.py` and `tests/test_statebridge_core.py`.
+  - `Failure-miss: F5 — _CHILD_RUNNER_CODE imported inspect/json before registering sys.addaudithook and omitted socket.sendmsg/getaddrinfo; canonicalize_exchange() fast-path skipped Cookie header merge and path query split → dual-path inconsistency`: Confirmed (`G4`). Fixing in `statebridge_core.py`.
+  - `Failure-miss: F4 — run_workflow_sandbox() copied full os.environ, left unredacted home/temp paths in error_detail, and did not check gold_exec status → local path disclosure in runs.jsonl and unverified reference execution`: Confirmed (`G4`). Fixing in `statebridge_core.py`.
+
 

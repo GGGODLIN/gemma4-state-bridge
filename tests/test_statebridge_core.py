@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 import json
+import os
 import random
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
-
-import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = ROOT / "skills" / "state-bridge" / "scripts"
@@ -27,6 +27,7 @@ DEFAULT_STRIPPED_HEADERS = {
   "accept-encoding",
   "content-length",
   "accept",
+  "content-type",
 }
 
 
@@ -50,7 +51,7 @@ def independent_oracle_canonical_step(
     "headers": norm_headers,
     "cookies": dict(cookies),
     "body_json": json_obj,
-    "body_text": "" if json_obj is not None else "",
+    "body_text": "",
   }
 
 
@@ -229,17 +230,42 @@ def test_sandbox_egress_guard_and_timeout_process_cleanup():
   assert res_egress["outcome_category"] == "PRE_HTTP_RUNTIME_ERROR"
   assert "NON_LOOPBACK_EGRESS_BLOCKED" in res_egress.get("error_detail", "")
 
-  # 2. Infinite loop / hang must trigger TIMEOUT_OR_HANG and leave 0 orphan processes
-  hang_files = dict(wf["httpx_gold_files"])
-  hang_files[target_file] = (
-    "import httpx\nimport time\n"
-    f"MARKER = 'STATEBRIDGE_ORPHAN_TEST_{random.randint(10000, 99999)}'\n"
+  # 1b. Non-loopback UDP sendmsg must also be blocked by sys.addaudithook
+  sendmsg_files = dict(wf["httpx_gold_files"])
+  sendmsg_files[target_file] = (
+    "import httpx\nimport socket\n"
     "def execute_step(client, base_url, *args, **kwargs):\n"
-    "  while True:\n"
-    "    time.sleep(0.1)\n"
+    "  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n"
+    "  s.sendmsg([b'x'], [], 0, ('198.51.100.1', 53))\n"
   )
-  res_hang = sb.run_workflow_sandbox(wf, hang_files, timeout_sec=1.2)
-  assert res_hang["outcome_category"] == "TIMEOUT_OR_HANG"
+  res_sendmsg = sb.run_workflow_sandbox(wf, sendmsg_files, timeout_sec=2.0)
+  assert res_sendmsg["outcome_category"] == "PRE_HTTP_RUNTIME_ERROR"
+  assert "NON_LOOPBACK_EGRESS_BLOCKED" in res_sendmsg.get("error_detail", "")
+
+  # 2. Infinite loop / hang must trigger TIMEOUT_OR_HANG and leave 0 orphan processes
+  with tempfile.NamedTemporaryFile(prefix="sb_pid_", delete=False) as tf:
+    pid_file = Path(tf.name)
+  try:
+    hang_files = dict(wf["httpx_gold_files"])
+    hang_files[target_file] = (
+      "import httpx\nimport os\nimport subprocess\nimport sys\nimport time\n"
+      "def execute_step(client, base_url, *args, **kwargs):\n"
+      "  child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)'])\n"
+      f"  open({str(pid_file)!r}, 'w').write(str(child.pid))\n"
+      "  while True:\n"
+      "    time.sleep(0.1)\n"
+    )
+    res_hang = sb.run_workflow_sandbox(wf, hang_files, timeout_sec=1.2)
+    assert res_hang["outcome_category"] == "TIMEOUT_OR_HANG"
+    spawned_pid = int(pid_file.read_text(encoding="utf-8").strip())
+    alive = True
+    try:
+      os.kill(spawned_pid, 0)
+    except ProcessLookupError:
+      alive = False
+    assert alive is False, f"Orphan grandchild process {spawned_pid} survived timeout cleanup"
+  finally:
+    pid_file.unlink(missing_ok=True)
 
 
 def test_all_30_workflows_pass_reference_and_diverge_on_arm1_codemod():

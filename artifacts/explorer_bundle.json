@@ -8,7 +8,7 @@
       "workflows_per_family": 6,
       "total_llm_generations": 240,
       "total_evaluated_runs": 270,
-      "replay_elapsed_sec": 8.465
+      "replay_elapsed_sec": 8.507
     },
     "twinapi_audit": {
       "requests_top_level_functions": [
@@ -65,6 +65,8 @@
             },
             "mean_prompt_tokens": 0,
             "mean_completion_tokens": 0,
+            "mean_reasoning_tokens": 0,
+            "mean_visible_completion_tokens": 0,
             "mean_thought_chars": 0,
             "mean_visible_chars": 510.1,
             "by_family": {
@@ -100,6 +102,8 @@
             },
             "mean_prompt_tokens": 497.7,
             "mean_completion_tokens": 193.5,
+            "mean_reasoning_tokens": 1143.0,
+            "mean_visible_completion_tokens": 193.5,
             "mean_thought_chars": 4572.2,
             "mean_visible_chars": 628.7,
             "by_family": {
@@ -135,6 +139,8 @@
             },
             "mean_prompt_tokens": 637.7,
             "mean_completion_tokens": 188.9,
+            "mean_reasoning_tokens": 1191.2,
+            "mean_visible_completion_tokens": 188.9,
             "mean_thought_chars": 4764.6,
             "mean_visible_chars": 608.3,
             "by_family": {
@@ -170,6 +176,8 @@
             },
             "mean_prompt_tokens": 799.9,
             "mean_completion_tokens": 234.7,
+            "mean_reasoning_tokens": 2099.0,
+            "mean_visible_completion_tokens": 234.7,
             "mean_thought_chars": 8396.0,
             "mean_visible_chars": 769.1,
             "by_family": {
@@ -205,6 +213,8 @@
             },
             "mean_prompt_tokens": 702.7,
             "mean_completion_tokens": 196.0,
+            "mean_reasoning_tokens": 1411.8,
+            "mean_visible_completion_tokens": 196.0,
             "mean_thought_chars": 5647.3,
             "mean_visible_chars": 637.6,
             "by_family": {
@@ -307,6 +317,8 @@
             },
             "mean_prompt_tokens": 0,
             "mean_completion_tokens": 0,
+            "mean_reasoning_tokens": 0,
+            "mean_visible_completion_tokens": 0,
             "mean_thought_chars": 0,
             "mean_visible_chars": 510.1,
             "by_family": {
@@ -342,6 +354,8 @@
             },
             "mean_prompt_tokens": 497.7,
             "mean_completion_tokens": 203.1,
+            "mean_reasoning_tokens": 2130.3,
+            "mean_visible_completion_tokens": 203.1,
             "mean_thought_chars": 8521.7,
             "mean_visible_chars": 663.0,
             "by_family": {
@@ -377,6 +391,8 @@
             },
             "mean_prompt_tokens": 637.7,
             "mean_completion_tokens": 209.3,
+            "mean_reasoning_tokens": 2501.4,
+            "mean_visible_completion_tokens": 209.3,
             "mean_thought_chars": 10005.8,
             "mean_visible_chars": 689.3,
             "by_family": {
@@ -403,25 +419,26 @@
             }
           },
           "arm4_callgraph_slice": {
-            "pass_count": 28,
+            "pass_count": 29,
             "total": 30,
-            "solve_rate": 0.9333,
+            "solve_rate": 0.9667,
             "outcome_counts": {
-              "PASS_EQUIVALENT": 28,
-              "PARSE_OR_SYNTAX_ERROR": 1,
+              "PASS_EQUIVALENT": 29,
               "STEP_K_WIRE_DIVERGENCE": 1
             },
             "mean_prompt_tokens": 799.9,
-            "mean_completion_tokens": 257.4,
+            "mean_completion_tokens": 258.8,
+            "mean_reasoning_tokens": 3705.2,
+            "mean_visible_completion_tokens": 258.8,
             "mean_thought_chars": 14820.8,
-            "mean_visible_chars": 861.6,
+            "mean_visible_chars": 866.7,
             "by_family": {
               "F1_REDIRECT_FOLLOW_DEFAULT": {
                 "pass_count": 6,
                 "total": 6
               },
               "F2_CROSS_ORIGIN_AUTH_STRIP": {
-                "pass_count": 5,
+                "pass_count": 6,
                 "total": 6
               },
               "F3_COOKIE_JAR_SCOPING": {
@@ -448,6 +465,8 @@
             },
             "mean_prompt_tokens": 702.7,
             "mean_completion_tokens": 203.8,
+            "mean_reasoning_tokens": 2618.5,
+            "mean_visible_completion_tokens": 203.8,
             "mean_thought_chars": 10473.7,
             "mean_visible_chars": 664.9,
             "by_family": {
@@ -477,63 +496,63 @@
         "paired_comparisons": {
           "arm4_vs_arm1": {
             "n": 30,
-            "pass_a": 28,
+            "pass_a": 29,
             "pass_b": 0,
-            "rate_a": 0.9333,
+            "rate_a": 0.9667,
             "rate_b": 0.0,
-            "diff": 0.9333,
-            "discordant_a_wins": 28,
+            "diff": 0.9667,
+            "discordant_a_wins": 29,
             "discordant_b_wins": 0,
             "both_pass": 0,
-            "both_fail": 2,
-            "mcnemar_p": 1e-08,
-            "ci95_low": 0.8333,
+            "both_fail": 1,
+            "mcnemar_p": 0.0,
+            "ci95_low": 0.9,
             "ci95_high": 1.0
           },
           "arm4_vs_arm2": {
             "n": 30,
-            "pass_a": 28,
+            "pass_a": 29,
             "pass_b": 4,
-            "rate_a": 0.9333,
+            "rate_a": 0.9667,
             "rate_b": 0.1333,
-            "diff": 0.8,
-            "discordant_a_wins": 24,
+            "diff": 0.8333,
+            "discordant_a_wins": 25,
             "discordant_b_wins": 0,
             "both_pass": 4,
-            "both_fail": 2,
-            "mcnemar_p": 1.2e-07,
-            "ci95_low": 0.6333,
-            "ci95_high": 0.9333
+            "both_fail": 1,
+            "mcnemar_p": 6e-08,
+            "ci95_low": 0.7,
+            "ci95_high": 0.9667
           },
           "arm4_vs_arm3": {
             "n": 30,
-            "pass_a": 28,
+            "pass_a": 29,
             "pass_b": 4,
-            "rate_a": 0.9333,
+            "rate_a": 0.9667,
             "rate_b": 0.1333,
-            "diff": 0.8,
-            "discordant_a_wins": 24,
+            "diff": 0.8333,
+            "discordant_a_wins": 25,
             "discordant_b_wins": 0,
             "both_pass": 4,
-            "both_fail": 2,
-            "mcnemar_p": 1.2e-07,
-            "ci95_low": 0.6333,
-            "ci95_high": 0.9333
+            "both_fail": 1,
+            "mcnemar_p": 6e-08,
+            "ci95_low": 0.7,
+            "ci95_high": 0.9667
           },
           "arm4_vs_arm5": {
             "n": 30,
-            "pass_a": 28,
+            "pass_a": 29,
             "pass_b": 4,
-            "rate_a": 0.9333,
+            "rate_a": 0.9667,
             "rate_b": 0.1333,
-            "diff": 0.8,
-            "discordant_a_wins": 24,
+            "diff": 0.8333,
+            "discordant_a_wins": 25,
             "discordant_b_wins": 0,
             "both_pass": 4,
-            "both_fail": 2,
-            "mcnemar_p": 1.2e-07,
-            "ci95_low": 0.6333,
-            "ci95_high": 0.9333
+            "both_fail": 1,
+            "mcnemar_p": 6e-08,
+            "ci95_low": 0.7,
+            "ci95_high": 0.9667
           }
         }
       }
@@ -3348,14 +3367,14 @@
           "migrated_code": "import httpx\nfrom session_setup import (\n    finalize_step_contract, \n    prepare_client_session, \n    build_partner_hop_headers, \n    SCRUB_HEADER\n)\n\ndef execute_step(base_url: str) -> dict:\n    \"\"\"Run step 1 (/origin_hop_5) and follow Location to partner hop.\"\"\"\n    client = prepare_client_session()\n    try:\n        # Step 1: Initial request to origin hop\n        r1 = client.get(f\"{base_url}/origin_hop_5\", follow_redirects=False)\n        next_path = r1.headers[\"Location\"]\n\n        # Upstream contract: before step 2, delete SCRUB_HEADER and attach partner hop headers\n        client.headers.pop(SCRUB_HEADER, None)\n        partner_headers = build_partner_hop_headers(r1)\n\n        # Step 2: Request to partner hop using the derived path and headers\n        r2 = client.get(f\"{base_url}{next_path}\", headers=partner_headers, follow_redirects=False)\n        \n        return finalize_step_contract(r2)\n    finally:\n        client.close()\n"
         },
         "gemma-4-26b-a4b-it:arm4_callgraph_slice": {
-          "outcome_category": "PARSE_OR_SYNTAX_ERROR",
+          "outcome_category": "PASS_EQUIVALENT",
           "first_divergence_step": null,
           "divergence_field": null,
           "expected_canonical_step": null,
           "actual_canonical_step": null,
           "thought_chars": 27293,
-          "visible_chars": 839,
-          "migrated_code": "```python\nimport httpx\nfrom session_setup import (\n    finalize_step_contract,\n    prepare_client_session,\n    build_partner_hop_headers,\n    SCRUB_HEADER,\n)\n\ndef execute_step(base_url: str) -> dict:\n    \"\"\"Run step 1 (/origin_hop_5) and follow Location to partner hop.\"\"\"\n    session = prepare_client_session()\n    try:\n        # Step 1: Initial request without following redirects\n        r1 = session.get(f\"{base_url}/origin_hop_5\", follow_redirects=False)\n        next_path = r1.headers[\"Location\"]\n\n        # Satisfy upstream/downstream contract:\n        # 1. Strip SCRUB_HEADER from the client session\n        session.headers.pop(SCRUB_HEADER, None)\n        \n        # 2. Attach PARTNER_HEADER for step 2 using the hop ticket from r1\n        r2 = session.get(\n            f\"{base_url}{next_path}\",\n            follow_redirects=False,\n"
+          "visible_chars": 992,
+          "migrated_code": "import httpx\nfrom session_setup import (\n    finalize_step_contract,\n    prepare_client_session,\n    build_partner_hop_headers,\n    SCRUB_HEADER,\n)\n\ndef execute_step(base_url: str) -> dict:\n    \"\"\"Run step 1 (/origin_hop_5) and follow Location to partner hop.\"\"\"\n    session = prepare_client_session()\n    try:\n        # Step 1: Initial request without following redirects\n        r1 = session.get(f\"{base_url}/origin_hop_5\", follow_redirects=False)\n        next_path = r1.headers[\"Location\"]\n\n        # Satisfy upstream/downstream contract:\n        # 1. Strip SCRUB_HEADER from the client session\n        session.headers.pop(SCRUB_HEADER, None)\n        \n        # 2. Attach PARTNER_HEADER for step 2 using the hop ticket from r1\n        r2 = session.get(\n            f\"{base_url}{next_path}\",\n            follow_redirects=False,\n            headers=build_partner_hop_headers(r1),\n        )\n        \n        return finalize_step_contract(r2)\n    finally:\n        session.close()\n"
         },
         "gemma-4-31b-it:arm5_unrelated_slice": {
           "outcome_category": "STEP_K_WIRE_DIVERGENCE",

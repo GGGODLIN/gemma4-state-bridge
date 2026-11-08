@@ -32,4 +32,7 @@
 
 - **Ticket 03 YAGNI Runner (`2026-11-09`)**: `ticket-yagni-runner.py` returned `unreviewed: runner-error` (`UnicodeDecodeError` when `subprocess.run(..., text=True)` decoded `git diff` over `paper/paper.pdf`'s `%PDF-1.4\n%\x93\x8c\x8b\x9e` header). Recorded per `/implement` Inline Step 3 without retrying with different arguments; full scope/YAGNI review runs at Step 3 closeout (`review-implement`).
 - **Visual & SSOT Audit (`2026-11-09`)**: Visually inspected `fig1_5arm_ablation.png`, `fig2_family_breakdown.png`, `fig3_twinapi_paradox.png`, `paper/paper.pdf` (pages 1–3), and Playwright screenshots of `explorer/index.html` (`1440×1100`); caught and fixed a stale `5.96e-7` fallback string in `explorer_template.html` and added a strict SSOT percentage allowlist + McNemar token check to `scripts/verify_ssot_consistency.py`.
+- **Closeout Review (`python-reviewer` & `security-reviewer`, `2026-11-09`)**:
+  - `Acceptance-miss — reproduce_statebridge.ipynb replays all 270 runs and recomputes statistical tests + render_surfaces.py compiles all table numbers dynamically from SSOT + verify_ssot_consistency.py checks Notebook and Explorer percentage allowlists and dynamic McNemar p-values → Notebook only executed 1 sample workflow, writeup had static outcome/family cells, and verify_ssot_consistency.py skipped _PCT_RE on Notebook/Explorer`: Confirmed (`G3`). Fixing in `render_surfaces.py`, `verify_ssot_consistency.py`, and `tests/test_verify_ssot_consistency.py`.
+
 

@@ -27,4 +27,8 @@
 
 - **Ticket 02 YAGNI Runner (`2026-11-09`)**: `ticket-yagni-runner.py` returned `unreviewed: diff-truncated` (`error.json` under `call_6728779684531732151__tsk16__cbPJmQNuo3n3tU6R__02/manual/`) because generated `artifacts/*.json(l)` (`18,371` lines) sort alphabetically before `scripts/`. Recorded per `/implement` Inline Step 3 without retrying with different arguments; full scope/YAGNI audit will run at Step 3 closeout (`review-implement`).
 - **Output Token Budget Adjustment (`2026-11-09`)**: 5/240 runs on `gemma-4-26b-a4b-it` hit `finish_reason=length` at `max_tokens=8192` due to verbose `<thought>` traces (`~14.8k` chars mean on Arm 4); raised `max_tokens` to `16384` per `model-onboard` output-budget rule, achieving `240/240` `status: ok` completions.
+- **Closeout Review (`python-reviewer` & `security-reviewer`, `2026-11-09`)**:
+  - `Acceptance-miss — extract_code_and_thought() handles finish_reason=="length" with unclosed code fence + records reasoning_tokens/visible_completion_tokens + min_interval=2.0s + deterministic build_ssot.py replay → F2_05 Arm 4 (26B-A4B-IT) had closed </thought> but unclosed code fence under finish_reason="length" and was marked truncated=False, causing PARSE_OR_SYNTAX_ERROR; replay_elapsed_sec mutated metrics_ssot.json on --verify-replay`: Confirmed (`G3`/`G4`). Fixing `run_gemma4_matrix.py` and `build_ssot.py`, re-running `F2_05` at `max_tokens=16384`, and re-compiling SSOT.
+  - `Failure-miss: F7 — build_twinapi_audit.py:263 dead branch contained undefined symbol httpx_client_overlap → Ruff F821`: Confirmed (`G1` must-report). Removing dead ternary branch in `build_twinapi_audit.py`.
+
 

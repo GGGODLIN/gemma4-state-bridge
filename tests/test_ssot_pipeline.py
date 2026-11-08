@@ -30,11 +30,22 @@ def test_extract_code_and_thought_strips_thought_and_handles_malformed():
   assert "import requests" not in parsed["extracted_code"]
   assert "import httpx" in parsed["extracted_code"]
 
-  # Unclosed <thought> or finish_reason == 'length' with no code block must flag truncated
+  # Unclosed <thought> or finish_reason == 'length' with no/unclosed code block must flag truncated
   sample_truncated = "<thought>Still thinking about redirects and cookies..."
   parsed_trunc = runner_mod.extract_code_and_thought(sample_truncated, finish_reason="length")
   assert parsed_trunc["truncated"] is True
   assert parsed_trunc["extracted_code"] == ""
+
+  sample_mid_fence = (
+    "<thought>Done thinking.</thought>\n"
+    "```python\nimport httpx\ndef execute_step(base_url: str) -> dict:\n  r = session.get("
+  )
+  parsed_mid = runner_mod.extract_code_and_thought(sample_mid_fence, finish_reason="length")
+  assert parsed_mid["truncated"] is True
+  assert parsed_mid["extracted_code"] == ""
+
+  assert twin_mod._levenshtein_similarity("post", "post") == 1.0
+  assert twin_mod._cosine([1.0, 0.0], [1.0, 0.0]) == 1.0
 
 
 def test_checkpoint_loader_skips_completed_entries(tmp_path: Path):
