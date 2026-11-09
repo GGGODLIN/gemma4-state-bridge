@@ -33,5 +33,7 @@
   - `Acceptance-miss — build_arm_context() constructs all 5 arms + CLI subcommand reproduce-paper + 0 orphan processes assertion → build_arm_context() computed called_names without filtering Arm 4 by call-graph reachability, main() lacked reproduce-paper subcommand, and timeout test did not assert 0 surviving child PIDs`: Confirmed (`G3`). Fixing in `statebridge_core.py` and `tests/test_statebridge_core.py`.
   - `Failure-miss: F5 — _CHILD_RUNNER_CODE imported inspect/json before registering sys.addaudithook and omitted socket.sendmsg/getaddrinfo; canonicalize_exchange() fast-path skipped Cookie header merge and path query split → dual-path inconsistency`: Confirmed (`G4`). Fixing in `statebridge_core.py`.
   - `Failure-miss: F4 — run_workflow_sandbox() copied full os.environ, left unredacted home/temp paths in error_detail, and did not check gold_exec status → local path disclosure in runs.jsonl and unverified reference execution`: Confirmed (`G4`). Fixing in `statebridge_core.py`.
+- 2026-11-09 Step 3.8 Architecture Visual Candidate Gate: `waived` (human decision `1b`, reason: paper PDF and README already include 3 high-DPI charts and architecture documentation; `feature_base_sha=e435f827643868adc69b91ce821dcab6c820250e`, `head_sha=6e1b17574dea6e849ff266c06806da5ea7b264f4`).
+
 
 
