@@ -65,7 +65,16 @@
 - `Y2`: Remove `OUTCOME_CATEGORIES`, `or emb_bias < 0`, and `self.runtime_state` from `skills/state-bridge/scripts/statebridge_core.py`.
 - `Y3`: Remove `if "5.96e-7" in e_text:` from `scripts/verify_ssot_consistency.py`.
 ### Targeted rechecks
-- Pending repair commit.
+- `S1`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`statebridge_core.py reproduce-paper` executes `build_ssot.build_ssot()` live replay in `8.507s < 15s` and outputs `benchmark`, `twinapi_audit`, and `models` 5-arm ablation tables + McNemar/Bootstrap statistics).
+- `S2`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`arm3_embedding_topk` loads `twinapi_embeddings_256d.json` and ranks candidate functions; `arm4_callgraph_slice` filters `setup_funcs` via `called_names | module_consts` 1–2 hop AST reachability with 0 matches for `session_setup.py:" in k`).
+- `S3`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`render_surfaces.py` dynamically formats `90.0%–96.7%` in `paper.pdf` Conclusion; `verify_ssot_consistency.py` extracts `BT..ET` text from `paper.pdf` and passes all 13 `expected_tokens` and `_PCT_RE` allowlist checks).
+- `S4`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`run_gemma4_matrix.py` uses `temperature=0.0` and `max_tokens=8192 if attempt == 1 else 16384`, synchronized across `spec.md:33`, `decisions/0001:3`, and `02-twinapi-audit-and-gemma4-experiments.md:3`).
+- `S5`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`explorer_template.html` and `explorer/index.html` include the `Arm 4 (StateBridge)` tab `data-reftab="arm4_migrated_code"` in the 1-vs-1 Diff Split View).
+- `Y1`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`_fallback_explorer_template` removed, `command grep` count = 0).
+- `Y2`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`OUTCOME_CATEGORIES` and `runtime_state` removed, `command grep` count = 0).
+- `Y3`: `pass` — verified at `56cfcba999abea8f87ecd64718af9b2700bf5e6b` (`5.96e-7` check removed from `verify_ssot_consistency.py`, `command grep` count = 0).
+- Final suite against `56cfcba999abea8f87ecd64718af9b2700bf5e6b`: `17 passed in 19.54s` (`pytest /Users/linhancheng/Desktop/projects/gemma4-state-bridge/tests/ -v`).
 ### Summary
-- Run status: BLOCKED (awaiting bounded repair loop and targeted recheck for `S1..S5`, `Y1..Y3`)
+- Run status: PASS
+
 
