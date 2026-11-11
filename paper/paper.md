@@ -6,9 +6,9 @@
 
 ## Abstract
 
-When autonomous coding agents migrate repositories across sibling libraries such as Python's `requests` (`2.34.2`) and `httpx` (`0.28.1`), they confront what we formalize as the **Stateful False-Friend Paradox**: surface API names and dense retrieval embeddings are nearly identical, yet multi-step runtime state transitions diverge silently on the wire. In our empirical audit (**TwinAPI**), `requests` and `httpx` share **88.9%** (`8/9`) exact top-level function names, **83.3%** (`10/12`) core `Session`/`Client` method names, and a mean 256-dimensional embedding cosine similarity of **0.873** (`google/models/gemini-embedding-001`, `dimensions=256`) across 12 stateful false-friend API pairs. Consequently, deterministic AST codemods (`Arm 1`) pass **0.0%** (`0/30`) of multi-step workflows, while single-file prompting (`Arm 2`) and 256-d embedding Top-K retrieval (`Arm 3`) both stall at **13.3%** (`4/30`) on `Gemma-4-31B-IT` and **13.3%** (`4/30`) on `Gemma-4-26B-A4B-IT`.
+When autonomous coding agents migrate repositories across sibling libraries such as Python's `requests` (`2.34.2`) and `httpx` (`0.28.1`), they confront what we formalize as the **Stateful False-Friend Paradox**: surface API names and dense retrieval embeddings are nearly identical, yet multi-step runtime state transitions diverge silently on the wire. In our empirical audit (**TwinAPI**), `requests` and `httpx` share **88.9%** (`8/9`) exact top-level function names, **83.3%** (`10/12`) core `Session`/`Client` method names, and a mean 256-dimensional embedding cosine similarity of **0.873** (`google/models/gemini-embedding-001`, `dimensions=256`) across 12 stateful false-friend API pairs. Consequently, deterministic AST codemods (`Arm 1`) pass **0.0%** (`0/30`) of multi-step workflows, while single-file prompting (`Arm 2`) and fixed HTTP-distractor context (`Arm 3`) both stall at **13.3%** (`4/30`) on `Gemma-4-31B-IT` and **13.3%** (`4/30`) on `Gemma-4-26B-A4B-IT`.
 
-We introduce **StateBridge**, an open-source benchmark (`StateBridge-Bench`), call-graph state-slice retrieval protocol (`Arm 4`), and live loopback HTTP verification harness (`127.0.0.1:0`). Instead of retrieving lexically similar HTTP utility files, `StateBridge` traces 1–2 hops along the static call graph from the target workflow into cross-file session factories (`session_setup.py`) to expose hidden stateful contracts (redirect policies, cross-origin auth-header hooks, domain-scoped cookie jars, streaming context lifecycles, and status-exception hierarchies). Evaluated across **270 live loopback HTTP executions** (**240 real Gemma 4 generations** + **30 deterministic codemod runs**), `StateBridge` (`Arm 4`) elevates multi-step wire-equivalence solve rates to **90.0%** (`27/30`, exact two-sided McNemar $p = 2.4e-07$) on dense `Gemma-4-31B-IT` and **96.7%** (`29/30`, McNemar $p = 6e-08$) on Mixture-of-Experts `Gemma-4-26B-A4B-IT`. An equal-token negative control (`Arm 5`, injecting unrelated repository functions) scores only **16.7%** (`5/30`) on `Gemma-4-31B-IT` and **13.3%** (`4/30`) on `Gemma-4-26B-A4B-IT`, proving that the **+73.3% to +83.3%** accuracy gain stems from structural call-graph state alignment rather than prompt length.
+We introduce **StateBridge**, an open-source benchmark (`StateBridge-Bench`), call-graph state-slice retrieval protocol (`Arm 4`), and live loopback HTTP verification harness (`127.0.0.1:0`). Instead of retrieving lexically similar HTTP utility files, `StateBridge` traces 1–2 hops along the static call graph from the target workflow into cross-file session factories (`session_setup.py`) to expose hidden stateful contracts (redirect policies, cross-origin auth-header hooks, domain-scoped cookie jars, streaming context lifecycles, and status-exception hierarchies). Evaluated across **270 live loopback HTTP executions** (**240 real Gemma 4 generations** + **30 deterministic codemod runs**), `StateBridge` (`Arm 4`) elevates multi-step wire-equivalence solve rates to **90.0%** (`27/30`, exact two-sided McNemar $p = 2.384185791015625e-07$) on dense `Gemma-4-31B-IT` and **96.7%** (`29/30`, McNemar $p = 5.960464477539063e-08$) on Mixture-of-Experts `Gemma-4-26B-A4B-IT`. An equal-token negative control (`Arm 5`, injecting unrelated repository functions) scores only **16.7%** (`5/30`) on `Gemma-4-31B-IT` and **13.3%** (`4/30`) on `Gemma-4-26B-A4B-IT`, proving that the **+73.3% to +83.3%** accuracy gain stems from structural call-graph state alignment rather than prompt length.
 
 ---
 
@@ -18,7 +18,7 @@ Repository-level library migration is a critical workload for developer agents. 
 
 Consider a three-step OAuth login flow in `requests`:
 1. `Step 0`: `session.post("/login", json=creds)` returns `HTTP 302 Found` with a `Set-Cookie: sid=...` header and `Location: /hop`. In `requests`, `Session.post` defaults to `allow_redirects=True`, automatically following the redirect and persisting the session cookie.
-2. `Step 1`: A cross-origin redirect to an audit endpoint triggers `requests`'s RFC-compliant `rebuild_proxies_and_auth` or a registered `session.hooks["response"]` callback.
+2. `Step 1`: A cross-origin redirect to an audit endpoint invokes `requests`'s `rebuild_auth` behavior or a registered `session.hooks["response"]` callback.
 3. `Step 2`: `session.get("/vault")` reads `session.cookies.get_dict()` and streams a binary payload via `resp.iter_content(chunk_size=16)`.
 
 When an agent rewrites `import requests` to `import httpx` in the target module `workflow_steps.py` without inspecting how the `httpx.Client` instance was constructed in `session_setup.py`, five silent traps detonate:
@@ -61,7 +61,7 @@ To test why standard retrieval-augmented generation (RAG) fails on sibling-libra
 | `P14` | `requests.Session.options` | `httpx.Client.options` | 1.00 | 0.14 | **0.909** | No (Equivalent) | `NONE` |
 | `P15` | `requests.Response.json` | `httpx.Response.json` | 1.00 | 1.00 | **0.899** | No (Equivalent) | `NONE` |
 
-Across the 15 audited pairs, `requests` and `httpx` exhibit **88.9%** (`8/9`) exact top-level function name overlap (`delete`, `get`, `head`, `options`, `patch`, `post`, `put`, `request`) and **83.3%** (`10/12`) overlap across core `Session`/`Client` verbs. Crucially, the 12 stateful false-friend pairs achieve a mean 256-d embedding cosine similarity of **0.873** and a mean short-name similarity of **0.7876**. Because dense retrievers rank candidates by cosine similarity to the target file's HTTP calls, an embedding index retrieves generic HTTP formatting helpers (`distractors.py:preview_http_headers`) that share surface HTTP vocabulary rather than the cross-file session state initializers (`session_setup.py`) that govern wire behavior.
+Across the 15 audited pairs, `requests` and `httpx` exhibit **88.9%** (`8/9`) exact top-level function name overlap (`delete`, `get`, `head`, `options`, `patch`, `post`, `put`, `request`) and **83.3%** (`10/12`) overlap across core `Session`/`Client` verbs. Crucially, the 12 stateful false-friend pairs achieve a mean 256-d embedding cosine similarity of **0.873** and a mean short-name similarity of **0.7876**. The audit measures API descriptor similarity; it does not evaluate repository retrieval. In the frozen experiment, `Arm 3` selects `distractors.py:preview_http_headers` by name and excludes `session_setup.py`; no TF-IDF or vector cosine retrieval was run. The later keyword-density ranker chooses the same function. The experiment therefore tests supplied context, not dense-retrieval quality.
 
 ---
 
@@ -71,8 +71,8 @@ Across the 15 audited pairs, `requests` and `httpx` exhibit **88.9%** (`8/9`) ex
 
 Each of the 30 benchmark workflows (`F1_01..F5_06`, 6 per family) consists of a 3-file miniature repository:
 - `workflow_steps.py` (**Target File Under Migration**): Implements `execute_step(base_url: str) -> dict`, executing a 2-to-3 step stateful HTTP sequence against `base_url`.
-- `session_setup.py` (**Cross-File Stateful Collaborator**): Defines `prepare_client_session()`, a family-specific state-bridge helper (`hop_request_kwargs`, `register_redirect_guard`, `snapshot_jar_dict`, `open_chunk_stream`, or `verify_status_and_extract`), and `finalize_step_contract()`.
-- `distractors.py` (**Repository Distractor Module**): Contains two functions with zero call edges to `execute_step`: (a) `preview_http_headers()`, a lexically dense HTTP header formatter that acts as an embedding magnet (`Arm 3`), and (b) `compute_window_digest()`, an equal-token rolling-checksum utility used as our negative control (`Arm 5`).
+- `session_setup.py` (**Cross-File Stateful Collaborator**): Defines `prepare_client_session()`, family-specific helpers (`hop_request_kwargs`, `build_partner_hop_headers`, `promote_cookie_to_header`, `summarize_stream_bytes`, or `build_recovery_headers`), and `finalize_step_contract()`.
+- `distractors.py` (**Repository Distractor Module**): Contains two functions with zero call edges to `execute_step`: (a) `preview_http_headers()`, a lexically dense HTTP header formatter that acts as a fixed HTTP-themed distractor (`Arm 3`), and (b) `compute_window_digest()`, an equal-token rolling-checksum utility used as our negative control (`Arm 5`).
 
 To evaluate functional equivalence without flaky external servers, `statebridge_core.py` spins up an ephemeral `ThreadingHTTPServer` bound to `127.0.0.1:0` for every run. Both the `requests` reference implementation and the candidate `httpx` implementation execute against fresh instances of this stateful loopback server. Every HTTP exchange is recorded and normalized by `canonicalize_exchange()` (lowercasing header keys, stripping transport-default headers such as `User-Agent`, `Host`, `Connection`, `Accept-Encoding`, `Accept`, `Content-Type`, and `Content-Length`, parsing query strings and cookies, and canonicalizing JSON bodies). `evaluate_trace_equivalence()` then compares the reference and candidate traces step-by-step, pinpointing the exact `first_divergence_step` and `divergence_field` (`method`, `path`, `headers`, `cookies`, `body_json`, or `trace_length`). Finally, `check_ast_anticheat()` parses the candidate AST to reject any residual `import requests` or `from requests import ...` statements (`CHEAT_RESIDUAL_REQUESTS`).
 
@@ -81,11 +81,11 @@ To evaluate functional equivalence without flaky external servers, `statebridge_
 We evaluate five arms across all 30 workflows:
 1. **`Arm 1` (`arm1_codemod`) — Deterministic AST/Syntax Codemod**: Replaces `import requests` with `import httpx` and `requests.Session()` with `httpx.Client()` inside `workflow_steps.py` without cross-file state bridging.
 2. **`Arm 2` (`arm2_target_only`) — Gemma 4 + Target File Only**: Provides `workflow_steps.py` and a static one-line `requests` ↔ `httpx` cheat-sheet (`0` repository context functions; mean prompt `497.7` tokens).
-3. **`Arm 3` (`arm3_embedding_topk`) — Gemma 4 + 256-d Embedding Top-K Retrieval**: Injects the top-ranked repository function by 256-d embedding cosine similarity to `workflow_steps.py` (`distractors.py:preview_http_headers`; mean prompt `637.7` tokens).
+3. **`Arm 3` (`arm3_embedding_topk`, legacy identifier) — Gemma 4 + Fixed HTTP Distractor**: The recorded experiment injects `distractors.py:preview_http_headers` by name, excluding session setup (mean prompt `637.7` tokens). It does not test an embedding retriever.
 4. **`Arm 4` (`arm4_callgraph_slice`) — Gemma 4 + StateBridge Call-Graph State Slice (Ours)**: Extracts the 1–2 hop static call-graph slice from `session_setup.py` (`prepare_client_session`, the family state-bridge helper, `finalize_step_contract`, and module-level state constants; mean prompt `799.9` tokens).
 5. **`Arm 5` (`arm5_unrelated_slice`) — Gemma 4 + Equal-Token Unrelated Slice (Negative Control)**: Injects `distractors.py:compute_window_digest()`, matched in character/token budget to `Arm 4` (mean prompt `702.7` tokens, verified by PBT invariant `P4`) while sharing `0` call-graph edges with `execute_step`.
 
-All LLM arms were executed against real **`google/models/gemma-4-31b-it`** (31B dense instruction-tuned) and **`google/models/gemma-4-26b-a4b-it`** (26B total / 4B active Mixture-of-Experts instruction-tuned) with `temperature=0.0`, separating `<thought>...</thought>` reasoning blocks from extracted code fences (`240` real generations total).
+All LLM arms were executed against real **`google/models/gemma-4-31b-it`** (31B dense instruction-tuned) and **`google/models/gemma-4-26b-a4b-it`** (26B total / 4B active Mixture-of-Experts instruction-tuned) with `temperature=0.0`, separating `<thought>...</thought>` reasoning blocks from extracted code fences (`240` retained generations). The runner allows three attempts: `max_tokens=8192` first, then `16384` after invalid/truncated output or a request error; 7 retained records have `attempt=2`. Only final successful responses are preserved, so failed-attempt causes and costs cannot be reconstructed.
 
 ---
 
@@ -93,21 +93,21 @@ All LLM arms were executed against real **`google/models/gemma-4-31b-it`** (31B 
 
 ### 4.1 Overall 5-Arm Solve Rates and Statistical Significance
 
-Table 2 summarizes the live loopback HTTP execution outcomes across all **270 runs** (replayed end-to-end in **8.507 seconds** via `scripts/build_ssot.py --verify-replay`).
+Table 2 summarizes the live loopback HTTP execution outcomes across all **270 runs** (replayed end-to-end in **31.801 seconds** via `scripts/build_ssot.py --verify-replay`).
 
 | Experimental Arm | `Gemma-4-31B-IT` Solve Rate | `Gemma-4-31B-IT` Outcomes (`PASS` / `WIRE_DIV` / `ERR`) | `Gemma-4-26B-A4B-IT` Solve Rate | `Gemma-4-26B-A4B-IT` Outcomes (`PASS` / `WIRE_DIV` / `ERR`) | Mean Prompt Tokens |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **`Arm 1`: Deterministic AST Codemod** | **0.0%** (`0/30`) | `0` / `17` / `13` | **0.0%** (`0/30`) | `0` / `17` / `13` | `0.0` |
 | **`Arm 2`: Target File Only** | **13.3%** (`4/30`) | `4` / `26` / `0` | **13.3%** (`4/30`) | `4` / `26` / `0` | `497.7` |
-| **`Arm 3`: 256-d Embedding Top-K** | **13.3%** (`4/30`) | `4` / `26` / `0` | **13.3%** (`4/30`) | `4` / `26` / `0` | `637.7` |
+| **`Arm 3`: HTTP Distractor** | **13.3%** (`4/30`) | `4` / `26` / `0` | **13.3%** (`4/30`) | `4` / `26` / `0` | `637.7` |
 | **`Arm 5`: Equal-Token Unrelated Slice** | **16.7%** (`5/30`) | `5` / `25` / `0` | **13.3%** (`4/30`) | `4` / `26` / `0` | `702.7` |
 | **`Arm 4`: StateBridge Call-Graph Slice (Ours)** | **90.0%** (`27/30`) | `27` / `3` / `0` | **96.7%** (`29/30`) | `29` / `1` / `0` | `799.9` |
 
-**Key Finding 1 — Call-Graph State Slicing (`Arm 4`) Outperforms Single-File and Embedding RAG by +76.7% to +83.3%:**
-On `Gemma-4-31B-IT`, `StateBridge` (`Arm 4`) improves solve rate from **13.3%** (`4/30`) in `Arm 2` and **13.3%** (`4/30`) in `Arm 3` to **90.0%** (`27/30`), winning `23` discordant workflow pairs against `0` losses (exact two-sided McNemar $p = 2.4e-07$, 10,000-draw paired bootstrap 95% CI `[60.0%, 90.0%]`). On `Gemma-4-26B-A4B-IT`, `StateBridge` (`Arm 4`) jumps from **13.3%** (`4/30`) in `Arm 2` and `Arm 3` to **96.7%** (`29/30`), winning `25` discordant pairs against `0` losses (exact McNemar $p = 6e-08$, 95% CI `[70.0%, 96.7%]`).
+**Key Finding 1 — Call-Graph State Slicing (`Arm 4`) Outperforms Single-File and HTTP-Distractor Context by +76.7% to +83.3%:**
+On `Gemma-4-31B-IT`, `StateBridge` (`Arm 4`) improves solve rate from **13.3%** (`4/30`) in `Arm 2` and **13.3%** (`4/30`) in `Arm 3` to **90.0%** (`27/30`), winning `23` discordant workflow pairs against `0` losses (exact two-sided McNemar $p = 2.384185791015625e-07$, 10,000-draw paired bootstrap 95% CI `[60.0%, 90.0%]`). On `Gemma-4-26B-A4B-IT`, `StateBridge` (`Arm 4`) jumps from **13.3%** (`4/30`) in `Arm 2` and `Arm 3` to **96.7%** (`29/30`), winning `25` discordant pairs against `0` losses (exact McNemar $p = 5.960464477539063e-08$, 95% CI `[70.0%, 96.7%]`).
 
 **Key Finding 2 — Ruling Out Prompt-Length Confounds (`Arm 4` vs `Arm 5`):**
-Comparing `Arm 4` against the equal-token unrelated slice (`Arm 5`) confirms that adding repository tokens without call-graph connectivity yields no meaningful gain (`16.7%` on `31B-IT`, `13.3%` on `26B-A4B-IT`). `Arm 4` beats `Arm 5` by **+73.3%** on `Gemma-4-31B-IT` ($p = 2.98e-06$, 95% CI `[53.3%, 90.0%]`) and **+83.3%** on `Gemma-4-26B-A4B-IT` ($p = 6e-08$, 95% CI `[70.0%, 96.7%]`).
+Comparing `Arm 4` against the equal-token unrelated slice (`Arm 5`) confirms that adding repository tokens without call-graph connectivity yields no meaningful gain (`16.7%` on `31B-IT`, `13.3%` on `26B-A4B-IT`). `Arm 4` beats `Arm 5` by **+73.3%** on `Gemma-4-31B-IT` ($p = 2.9802322387695312e-06$, 95% CI `[53.3%, 90.0%]`) and **+83.3%** on `Gemma-4-26B-A4B-IT` ($p = 5.960464477539063e-08$, 95% CI `[70.0%, 96.7%]`).
 
 ### 4.2 Per-Family Breakdown and Dense (`31B-IT`) vs MoE (`26B-A4B-IT`) Reasoning Telemetry
 
@@ -121,7 +121,7 @@ Comparing `Arm 4` against the equal-token unrelated slice (`Arm 5`) confirms tha
 
 Comparing the two Gemma 4 architectures reveals a striking efficiency-accuracy trade-off:
 - **MoE `Gemma-4-26B-A4B-IT` (4B active parameters) matches or exceeds Dense `31B-IT` (`96.7%` vs `90.0%`) by investing more internal `<thought>` reasoning**: Across `Arm 4`, `Gemma-4-26B-A4B-IT` generates a mean of **`14820.8`** `<thought>` characters (`258.8` completion tokens) compared to **`8396.0`** `<thought>` characters (`234.7` completion tokens) on `Gemma-4-31B-IT`.
-- **Where the remaining errors occur**: Without `StateBridge` (`Arms 2, 3, 5`), **86.7%** (`26/30`) of runs fail with `STEP_K_WIRE_DIVERGENCE`—the generated code is syntactically valid Python that imports `httpx`, yet silently diverges at Step 0 or Step 1 on the wire (e.g., failing to follow `302` redirects, leaking or dropping `Authorization` headers across origins, or failing to extract scoped cookies). With `StateBridge` (`Arm 4`), wire divergences drop from `26/30` to `3/30` on `31B-IT` and `1/30` on `26B-A4B-IT`.
+- **Where the remaining errors occur**: On `31B-IT`, wire divergences number `26/30`, `26/30`, and `25/30` for Arms 2, 3, and 5 respectively; on `26B-A4B-IT`, they number `26/30`, `26/30`, and `26/30`. Arm 4 has `3/30` and `1/30`. These counts describe this synthetic benchmark; they do not establish dense-retrieval failure.
 
 ---
 
@@ -129,14 +129,14 @@ Comparing the two Gemma 4 architectures reveals a striking efficiency-accuracy t
 
 1. **Gemma 4 Technical Report (Google DeepMind, 2026)**: Introduces the Gemma 4 open-weight model family, including the dense `Gemma-4-31B-IT` and sparse Mixture-of-Experts `Gemma-4-26B-A4B-IT` architectures with native `<thought>` reasoning traces. Our work provides the first controlled evaluation of both architectures on multi-step stateful library migration.
 2. **CodeMigrationBench (2026) & PyMigBench (2023)**: Benchmarks for real-world Python dependency and library migrations. While PyMigBench catalogs syntax-level code changes and CodeMigrationBench evaluates repository test pass rates, `StateBridge-Bench` isolates *stateful false-friend APIs* using a deterministic loopback HTTP state machine that pinpoints exact wire-level step divergences.
-3. **RepoTransBench (2024) & GitChameleon 2.0 (2025)**: Evaluate repository-level code translation and version-conditioned API generation. Our `TwinAPI` audit complements these benchmarks by demonstrating that high embedding similarity (`0.873` cosine) actively misleads Top-K vector retrieval (`Arm 3`) during sibling-library migration.
+3. **RepoTransBench (2024) & GitChameleon 2.0 (2025)**: Evaluate repository-level code translation and version-conditioned API generation. Our `TwinAPI` audit measures API-descriptor similarity (`0.873` cosine); the fixed HTTP-distractor control (`Arm 3`) does not evaluate vector retrieval.
 4. **RFC 9110 (HTTP Semantics) & RFC 6265 (HTTP State Management Mechanism)**: Define the redirect status semantics (`301`/`302`/`303`), cross-origin `Authorization` header stripping requirements, and `Cookie`/`Set-Cookie` domain scoping rules that underpin Divergence Families `F1`, `F2`, and `F3`.
 
 ---
 
 ## 6. Reproduction & Open-Source Artifacts
 
-All artifacts are self-contained and reproducible offline in `< 15 seconds` without external network calls or API keys:
+All replay steps run locally without API keys once source data and dependencies are available. Runtime depends on the machine and worker limit; the measured run took 31.801 seconds with three workers. The public [GitHub repository](https://github.com/GGGODLIN/gemma4-state-bridge), [Run All Notebook](https://github.com/GGGODLIN/gemma4-state-bridge/blob/main/notebooks/reproduce_statebridge.ipynb), and [figure gallery](https://github.com/GGGODLIN/gemma4-state-bridge/tree/main/paper/figures) contain the source and results. The Notebook searches local files and Kaggle Datasets before cloning; without data or Internet it labels its embedded summary as unverified.
 - **One-Command SSOT Replay & Verification**:
   ```bash
   uv run --with requests==2.34.2 --with httpx==0.28.1 python3 scripts/build_ssot.py --verify-replay

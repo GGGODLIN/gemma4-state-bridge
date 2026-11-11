@@ -927,7 +927,7 @@
         <div class="kpi-tile highlight-good">
           <span class="kpi-label">Equal-Token Controls (Arm 3 &amp; Arm 5)</span>
           <div class="kpi-value"><span>13.3%</span> <span class="kpi-sub">– 16.7%</span></div>
-          <div class="kpi-foot">Embedding Top-K (4/30) &amp; Unrelated Slice (5/30 on 31B, 4/30 on 26B)</div>
+          <div class="kpi-foot">Fixed HTTP Distractor (4/30) &amp; Unrelated Slice (5/30 on 31B, 4/30 on 26B)</div>
         </div>
       </div>
     </section>
@@ -1034,7 +1034,7 @@
             <div class="seg-group" id="arm-selector" role="group" aria-label="Select Experimental Arm">
               <button type="button" class="seg-btn" data-arm="arm1_codemod">Arm 1: AST Codemod</button>
               <button type="button" class="seg-btn" data-arm="arm2_target_only">Arm 2: Target-Only</button>
-              <button type="button" class="seg-btn" data-arm="arm3_embedding_topk">Arm 3: Embedding Top-K</button>
+              <button type="button" class="seg-btn" data-arm="arm3_embedding_topk">Arm 3: Fixed HTTP Distractor</button>
               <button type="button" class="seg-btn active" data-arm="arm4_callgraph_slice">Arm 4: StateBridge Slice</button>
               <button type="button" class="seg-btn" data-arm="arm5_unrelated_slice">Arm 5: Unrelated Control</button>
             </div>
@@ -1097,7 +1097,7 @@ window.__EXPLORER_BUNDLE__ = __EXPLORER_BUNDLE_JSON__;
       const ARM_META = {
         arm1_codemod: { short: "Arm 1: AST Codemod", label: "Arm 1 — Deterministic AST Codemod", desc: "Syntax-only symbol rewrite (requests.Session → httpx.Client) without cross-file context." },
         arm2_target_only: { short: "Arm 2: Target-Only", label: "Arm 2 — Target-File Only Prompt", desc: "LLM sees only workflow_steps.py; cross-file session_setup.py contract is hidden." },
-        arm3_embedding_topk: { short: "Arm 3: Embedding Top-K", label: "Arm 3 — Embedding Top-K Retrieval", desc: "256-D cosine similarity retrieves high-overlap HTTP header/cookie distractor functions." },
+        arm3_embedding_topk: { short: "Arm 3: Fixed HTTP Distractor", label: "Arm 3 — Fixed HTTP Distractor Retrieval", desc: "The frozen experiment selects preview_http_headers by name from distractors.py, excluding session_setup.py. No vector retrieval was tested." },
         arm4_callgraph_slice: { short: "Arm 4: StateBridge Slice", label: "Arm 4 — StateBridge 1-Hop Call-Graph Slice", desc: "AST import + call-site resolution injects exact 1-hop helper definitions from session_setup.py." },
         arm5_unrelated_slice: { short: "Arm 5: Unrelated Control", label: "Arm 5 — Equal-Token Unrelated Slice", desc: "Injects token-matched non-HTTP repository helper functions to rule out prompt-length effects." }
       };
@@ -1448,7 +1448,7 @@ window.__EXPLORER_BUNDLE__ = __EXPLORER_BUNDLE_JSON__;
           badgeStyle = "injected";
         } else if (state.arm === "arm3_embedding_topk") {
           injectedList = activeCase.arm3_functions || [];
-          sliceLabel = "Embedding Top-K Retrieved Symbols (High-Cosine Decoy):";
+          sliceLabel = "Fixed HTTP Distractor Symbols (No Vector Retrieval):";
           badgeStyle = "decoy";
         } else if (state.arm === "arm5_unrelated_slice") {
           injectedList = activeCase.arm5_functions || [];

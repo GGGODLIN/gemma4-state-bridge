@@ -74,6 +74,12 @@ def test_compute_paired_stats_mcnemar_and_bootstrap():
   assert stats["ci95_low"] > 0.25
 
 
+def test_exact_mcnemar_preserves_small_nonzero_probabilities():
+  assert ssot_mod._exact_mcnemar_two_sided(29, 0) == 2 / 2**29
+  assert ssot_mod._exact_mcnemar_two_sided(0, 29) == 2 / 2**29
+  assert ssot_mod._exact_mcnemar_two_sided(0, 0) == 1.0
+
+
 def test_twinapi_audit_and_full_270_run_ssot_artifacts_exist_and_validate():
   emb_path = ROOT / "artifacts" / "twinapi_embeddings_256d.json"
   audit_path = ROOT / "artifacts" / "twinapi_audit.json"

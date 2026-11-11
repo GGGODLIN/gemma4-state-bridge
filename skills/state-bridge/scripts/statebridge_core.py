@@ -985,7 +985,7 @@ def build_arm_context(
     selected_keys: list[str] = []
     selected_blocks: list[str] = []
   elif arm_id == "arm3_embedding_topk":
-    # Score candidate distractor functions using 256-d TwinAPI embeddings + HTTP lexical projection
+    # 凍結實驗按名稱選 preview_http_headers；後加的排名仍排除 setup，且不計算 cosine。
     emb_data = twinapi_embeddings
     if emb_data is None:
       emb_path = Path(__file__).resolve().parents[3] / "artifacts" / "twinapi_embeddings_256d.json"

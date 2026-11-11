@@ -8,7 +8,7 @@
       "workflows_per_family": 6,
       "total_llm_generations": 240,
       "total_evaluated_runs": 270,
-      "replay_elapsed_sec": 8.507
+      "replay_elapsed_sec": 31.801
     },
     "twinapi_audit": {
       "requests_top_level_functions": [
@@ -253,7 +253,7 @@
             "discordant_b_wins": 0,
             "both_pass": 0,
             "both_fail": 3,
-            "mcnemar_p": 1e-08,
+            "mcnemar_p": 1.4901161193847656e-08,
             "ci95_low": 0.7667,
             "ci95_high": 1.0
           },
@@ -268,7 +268,7 @@
             "discordant_b_wins": 0,
             "both_pass": 4,
             "both_fail": 3,
-            "mcnemar_p": 2.4e-07,
+            "mcnemar_p": 2.384185791015625e-07,
             "ci95_low": 0.6,
             "ci95_high": 0.9
           },
@@ -283,7 +283,7 @@
             "discordant_b_wins": 0,
             "both_pass": 4,
             "both_fail": 3,
-            "mcnemar_p": 2.4e-07,
+            "mcnemar_p": 2.384185791015625e-07,
             "ci95_low": 0.6,
             "ci95_high": 0.9
           },
@@ -298,7 +298,7 @@
             "discordant_b_wins": 1,
             "both_pass": 4,
             "both_fail": 2,
-            "mcnemar_p": 2.98e-06,
+            "mcnemar_p": 2.9802322387695312e-06,
             "ci95_low": 0.5333,
             "ci95_high": 0.9
           }
@@ -505,7 +505,7 @@
             "discordant_b_wins": 0,
             "both_pass": 0,
             "both_fail": 1,
-            "mcnemar_p": 0.0,
+            "mcnemar_p": 3.725290298461914e-09,
             "ci95_low": 0.9,
             "ci95_high": 1.0
           },
@@ -520,7 +520,7 @@
             "discordant_b_wins": 0,
             "both_pass": 4,
             "both_fail": 1,
-            "mcnemar_p": 6e-08,
+            "mcnemar_p": 5.960464477539063e-08,
             "ci95_low": 0.7,
             "ci95_high": 0.9667
           },
@@ -535,7 +535,7 @@
             "discordant_b_wins": 0,
             "both_pass": 4,
             "both_fail": 1,
-            "mcnemar_p": 6e-08,
+            "mcnemar_p": 5.960464477539063e-08,
             "ci95_low": 0.7,
             "ci95_high": 0.9667
           },
@@ -550,7 +550,7 @@
             "discordant_b_wins": 0,
             "both_pass": 4,
             "both_fail": 1,
-            "mcnemar_p": 6e-08,
+            "mcnemar_p": 5.960464477539063e-08,
             "ci95_low": 0.7,
             "ci95_high": 0.9667
           }

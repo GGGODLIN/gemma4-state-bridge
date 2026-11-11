@@ -28,7 +28,7 @@ def _exact_mcnemar_two_sided(b: int, c: int) -> float:
     return 1.0
   k = min(b, c)
   tail = sum(math.comb(n, i) for i in range(k + 1)) / (2 ** n)
-  return round(min(1.0, 2.0 * tail), 8)
+  return min(1.0, 2.0 * tail)
 
 
 def compute_paired_stats(
@@ -174,7 +174,7 @@ def build_ssot(
       "migrated_code": gen_meta.get("extracted_code", ""),
     }
 
-  with ThreadPoolExecutor(max_workers=8) as pool:
+  with ThreadPoolExecutor(max_workers=3) as pool:
     all_runs = list(pool.map(_eval_one, eval_items))
 
   replay_elapsed_sec = round(time.monotonic() - t0, 3)

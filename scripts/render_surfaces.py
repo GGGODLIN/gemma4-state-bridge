@@ -2,8 +2,6 @@
 """Render all 5 submission surfaces from artifacts/metrics_ssot.json and artifacts/explorer_bundle.json."""
 
 from __future__ import annotations
-import contextlib
-import io
 import json
 from pathlib import Path
 from typing import Any
@@ -42,7 +40,7 @@ def _render_figures(ssot: dict[str, Any], audit: dict[str, Any], fig_dir: Path) 
   arms_order = [
     ("arm1_codemod", "Arm 1: Deterministic AST Codemod"),
     ("arm2_target_only", "Arm 2: Target File Only + Static Cheat-Sheet"),
-    ("arm3_embedding_topk", "Arm 3: 256-d Embedding Top-K (HTTP Decoy)"),
+    ("arm3_embedding_topk", "Arm 3: HTTP Distractor (HTTP Decoy)"),
     ("arm5_unrelated_slice", "Arm 5: Equal-Token Unrelated Slice (Control)"),
     ("arm4_callgraph_slice", "Arm 4: StateBridge Call-Graph Slice (Ours)"),
   ]
@@ -110,6 +108,7 @@ def _render_figures(ssot: dict[str, Any], audit: dict[str, Any], fig_dir: Path) 
   fig1.tight_layout()
   fig1_path = fig_dir / "fig1_5arm_ablation.png"
   fig1.savefig(fig1_path, dpi=220, bbox_inches="tight")
+  fig1.savefig(fig1_path.with_suffix(".svg"), bbox_inches="tight")
   plt.close(fig1)
 
   # Figure 2: Per-Family Solve Rate Comparison (Arm 4 vs Arm 3 vs Arm 5 on Gemma-4-26B-A4B-IT & 31B-IT)
@@ -136,7 +135,7 @@ def _render_figures(ssot: dict[str, Any], audit: dict[str, Any], fig_dir: Path) 
     color="#1baf7a",
     edgecolor="#fcfcfb",
     linewidth=1.5,
-    label=f"Baseline (Arm 2/3/5: {_fmt_pct(m26['arm2_target_only']['solve_rate'])})",
+    label=f"26B Arm 2 baseline ({_fmt_pct(m26['arm2_target_only']['solve_rate'])})",
     zorder=3,
   )
   b2 = ax2.bar(
@@ -174,6 +173,7 @@ def _render_figures(ssot: dict[str, Any], audit: dict[str, Any], fig_dir: Path) 
   fig2.tight_layout()
   fig2_path = fig_dir / "fig2_family_breakdown.png"
   fig2.savefig(fig2_path, dpi=220, bbox_inches="tight")
+  fig2.savefig(fig2_path.with_suffix(".svg"), bbox_inches="tight")
   plt.close(fig2)
 
   # Figure 3: TwinAPI 256-d Embedding Cosine Similarity across 15 Audited API Pairs
@@ -203,6 +203,7 @@ def _render_figures(ssot: dict[str, Any], audit: dict[str, Any], fig_dir: Path) 
   fig3.tight_layout()
   fig3_path = fig_dir / "fig3_twinapi_paradox.png"
   fig3.savefig(fig3_path, dpi=220, bbox_inches="tight")
+  fig3.savefig(fig3_path.with_suffix(".svg"), bbox_inches="tight")
   plt.close(fig3)
 
   return {
@@ -290,7 +291,7 @@ def _build_writeup_markdown(ssot: dict[str, Any], audit: dict[str, Any]) -> str:
 
 ## Abstract
 
-When autonomous coding agents migrate repositories across sibling libraries such as Python's `requests` (`2.34.2`) and `httpx` (`0.28.1`), they confront what we formalize as the **Stateful False-Friend Paradox**: surface API names and dense retrieval embeddings are nearly identical, yet multi-step runtime state transitions diverge silently on the wire. In our empirical audit (**TwinAPI**), `requests` and `httpx` share **{top_pct}** (`8/9`) exact top-level function names, **{sess_pct}** (`10/12`) core `Session`/`Client` method names, and a mean 256-dimensional embedding cosine similarity of **{mean_cos}** (`google/models/gemini-embedding-001`, `dimensions=256`) across 12 stateful false-friend API pairs. Consequently, deterministic AST codemods (`Arm 1`) pass **{_fmt_pct(a31['arm1_codemod']['solve_rate'])}** (`{a31['arm1_codemod']['pass_count']}/30`) of multi-step workflows, while single-file prompting (`Arm 2`) and 256-d embedding Top-K retrieval (`Arm 3`) both stall at **{r31_a2}** (`{a31['arm2_target_only']['pass_count']}/30`) on `Gemma-4-31B-IT` and **{r26_a2}** (`{a26['arm2_target_only']['pass_count']}/30`) on `Gemma-4-26B-A4B-IT`.
+When autonomous coding agents migrate repositories across sibling libraries such as Python's `requests` (`2.34.2`) and `httpx` (`0.28.1`), they confront what we formalize as the **Stateful False-Friend Paradox**: surface API names and dense retrieval embeddings are nearly identical, yet multi-step runtime state transitions diverge silently on the wire. In our empirical audit (**TwinAPI**), `requests` and `httpx` share **{top_pct}** (`8/9`) exact top-level function names, **{sess_pct}** (`10/12`) core `Session`/`Client` method names, and a mean 256-dimensional embedding cosine similarity of **{mean_cos}** (`google/models/gemini-embedding-001`, `dimensions=256`) across 12 stateful false-friend API pairs. Consequently, deterministic AST codemods (`Arm 1`) pass **{_fmt_pct(a31['arm1_codemod']['solve_rate'])}** (`{a31['arm1_codemod']['pass_count']}/30`) of multi-step workflows, while single-file prompting (`Arm 2`) and fixed HTTP-distractor context (`Arm 3`) both stall at **{r31_a2}** (`{a31['arm2_target_only']['pass_count']}/30`) on `Gemma-4-31B-IT` and **{r26_a2}** (`{a26['arm2_target_only']['pass_count']}/30`) on `Gemma-4-26B-A4B-IT`.
 
 We introduce **StateBridge**, an open-source benchmark (`StateBridge-Bench`), call-graph state-slice retrieval protocol (`Arm 4`), and live loopback HTTP verification harness (`127.0.0.1:0`). Instead of retrieving lexically similar HTTP utility files, `StateBridge` traces 1–2 hops along the static call graph from the target workflow into cross-file session factories (`session_setup.py`) to expose hidden stateful contracts (redirect policies, cross-origin auth-header hooks, domain-scoped cookie jars, streaming context lifecycles, and status-exception hierarchies). Evaluated across **270 live loopback HTTP executions** (**240 real Gemma 4 generations** + **30 deterministic codemod runs**), `StateBridge` (`Arm 4`) elevates multi-step wire-equivalence solve rates to **{r31_a4}** (`{a31['arm4_callgraph_slice']['pass_count']}/30`, exact two-sided McNemar $p = {c31['arm4_vs_arm2']['mcnemar_p']}$) on dense `Gemma-4-31B-IT` and **{r26_a4}** (`{a26['arm4_callgraph_slice']['pass_count']}/30`, McNemar $p = {c26['arm4_vs_arm2']['mcnemar_p']}$) on Mixture-of-Experts `Gemma-4-26B-A4B-IT`. An equal-token negative control (`Arm 5`, injecting unrelated repository functions) scores only **{r31_a5}** (`{a31['arm5_unrelated_slice']['pass_count']}/30`) on `Gemma-4-31B-IT` and **{r26_a5}** (`{a26['arm5_unrelated_slice']['pass_count']}/30`) on `Gemma-4-26B-A4B-IT`, proving that the **+{_fmt_pct(c31['arm4_vs_arm5']['diff'])} to +{_fmt_pct(c26['arm4_vs_arm5']['diff'])}** accuracy gain stems from structural call-graph state alignment rather than prompt length.
 
@@ -302,7 +303,7 @@ Repository-level library migration is a critical workload for developer agents. 
 
 Consider a three-step OAuth login flow in `requests`:
 1. `Step 0`: `session.post("/login", json=creds)` returns `HTTP 302 Found` with a `Set-Cookie: sid=...` header and `Location: /hop`. In `requests`, `Session.post` defaults to `allow_redirects=True`, automatically following the redirect and persisting the session cookie.
-2. `Step 1`: A cross-origin redirect to an audit endpoint triggers `requests`'s RFC-compliant `rebuild_proxies_and_auth` or a registered `session.hooks["response"]` callback.
+2. `Step 1`: A cross-origin redirect to an audit endpoint invokes `requests`'s `rebuild_auth` behavior or a registered `session.hooks["response"]` callback.
 3. `Step 2`: `session.get("/vault")` reads `session.cookies.get_dict()` and streams a binary payload via `resp.iter_content(chunk_size=16)`.
 
 When an agent rewrites `import requests` to `import httpx` in the target module `workflow_steps.py` without inspecting how the `httpx.Client` instance was constructed in `session_setup.py`, five silent traps detonate:
@@ -331,7 +332,7 @@ To test why standard retrieval-augmented generation (RAG) fails on sibling-libra
 | :--- | :--- | :--- | :---: | :---: | :---: | :--- | :--- |
 {pairs_table}
 
-Across the 15 audited pairs, `requests` and `httpx` exhibit **{top_pct}** (`8/9`) exact top-level function name overlap (`delete`, `get`, `head`, `options`, `patch`, `post`, `put`, `request`) and **{sess_pct}** (`10/12`) overlap across core `Session`/`Client` verbs. Crucially, the 12 stateful false-friend pairs achieve a mean 256-d embedding cosine similarity of **{mean_cos}** and a mean short-name similarity of **{twin['mean_false_friend_short_name_similarity']:.4f}**. Because dense retrievers rank candidates by cosine similarity to the target file's HTTP calls, an embedding index retrieves generic HTTP formatting helpers (`distractors.py:preview_http_headers`) that share surface HTTP vocabulary rather than the cross-file session state initializers (`session_setup.py`) that govern wire behavior.
+Across the 15 audited pairs, `requests` and `httpx` exhibit **{top_pct}** (`8/9`) exact top-level function name overlap (`delete`, `get`, `head`, `options`, `patch`, `post`, `put`, `request`) and **{sess_pct}** (`10/12`) overlap across core `Session`/`Client` verbs. Crucially, the 12 stateful false-friend pairs achieve a mean 256-d embedding cosine similarity of **{mean_cos}** and a mean short-name similarity of **{twin['mean_false_friend_short_name_similarity']:.4f}**. The audit measures API descriptor similarity; it does not evaluate repository retrieval. In the frozen experiment, `Arm 3` selects `distractors.py:preview_http_headers` by name and excludes `session_setup.py`; no TF-IDF or vector cosine retrieval was run. The later keyword-density ranker chooses the same function. The experiment therefore tests supplied context, not dense-retrieval quality.
 
 ---
 
@@ -341,8 +342,8 @@ Across the 15 audited pairs, `requests` and `httpx` exhibit **{top_pct}** (`8/9`
 
 Each of the 30 benchmark workflows (`F1_01..F5_06`, 6 per family) consists of a 3-file miniature repository:
 - `workflow_steps.py` (**Target File Under Migration**): Implements `execute_step(base_url: str) -> dict`, executing a 2-to-3 step stateful HTTP sequence against `base_url`.
-- `session_setup.py` (**Cross-File Stateful Collaborator**): Defines `prepare_client_session()`, a family-specific state-bridge helper (`hop_request_kwargs`, `register_redirect_guard`, `snapshot_jar_dict`, `open_chunk_stream`, or `verify_status_and_extract`), and `finalize_step_contract()`.
-- `distractors.py` (**Repository Distractor Module**): Contains two functions with zero call edges to `execute_step`: (a) `preview_http_headers()`, a lexically dense HTTP header formatter that acts as an embedding magnet (`Arm 3`), and (b) `compute_window_digest()`, an equal-token rolling-checksum utility used as our negative control (`Arm 5`).
+- `session_setup.py` (**Cross-File Stateful Collaborator**): Defines `prepare_client_session()`, family-specific helpers (`hop_request_kwargs`, `build_partner_hop_headers`, `promote_cookie_to_header`, `summarize_stream_bytes`, or `build_recovery_headers`), and `finalize_step_contract()`.
+- `distractors.py` (**Repository Distractor Module**): Contains two functions with zero call edges to `execute_step`: (a) `preview_http_headers()`, a lexically dense HTTP header formatter that acts as a fixed HTTP-themed distractor (`Arm 3`), and (b) `compute_window_digest()`, an equal-token rolling-checksum utility used as our negative control (`Arm 5`).
 
 To evaluate functional equivalence without flaky external servers, `statebridge_core.py` spins up an ephemeral `ThreadingHTTPServer` bound to `127.0.0.1:0` for every run. Both the `requests` reference implementation and the candidate `httpx` implementation execute against fresh instances of this stateful loopback server. Every HTTP exchange is recorded and normalized by `canonicalize_exchange()` (lowercasing header keys, stripping transport-default headers such as `User-Agent`, `Host`, `Connection`, `Accept-Encoding`, `Accept`, `Content-Type`, and `Content-Length`, parsing query strings and cookies, and canonicalizing JSON bodies). `evaluate_trace_equivalence()` then compares the reference and candidate traces step-by-step, pinpointing the exact `first_divergence_step` and `divergence_field` (`method`, `path`, `headers`, `cookies`, `body_json`, or `trace_length`). Finally, `check_ast_anticheat()` parses the candidate AST to reject any residual `import requests` or `from requests import ...` statements (`CHEAT_RESIDUAL_REQUESTS`).
 
@@ -351,11 +352,11 @@ To evaluate functional equivalence without flaky external servers, `statebridge_
 We evaluate five arms across all 30 workflows:
 1. **`Arm 1` (`arm1_codemod`) — Deterministic AST/Syntax Codemod**: Replaces `import requests` with `import httpx` and `requests.Session()` with `httpx.Client()` inside `workflow_steps.py` without cross-file state bridging.
 2. **`Arm 2` (`arm2_target_only`) — Gemma 4 + Target File Only**: Provides `workflow_steps.py` and a static one-line `requests` ↔ `httpx` cheat-sheet (`0` repository context functions; mean prompt `{a31['arm2_target_only']['mean_prompt_tokens']}` tokens).
-3. **`Arm 3` (`arm3_embedding_topk`) — Gemma 4 + 256-d Embedding Top-K Retrieval**: Injects the top-ranked repository function by 256-d embedding cosine similarity to `workflow_steps.py` (`distractors.py:preview_http_headers`; mean prompt `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` tokens).
+3. **`Arm 3` (`arm3_embedding_topk`, legacy identifier) — Gemma 4 + Fixed HTTP Distractor**: The recorded experiment injects `distractors.py:preview_http_headers` by name, excluding session setup (mean prompt `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` tokens). It does not test an embedding retriever.
 4. **`Arm 4` (`arm4_callgraph_slice`) — Gemma 4 + StateBridge Call-Graph State Slice (Ours)**: Extracts the 1–2 hop static call-graph slice from `session_setup.py` (`prepare_client_session`, the family state-bridge helper, `finalize_step_contract`, and module-level state constants; mean prompt `{a31['arm4_callgraph_slice']['mean_prompt_tokens']}` tokens).
 5. **`Arm 5` (`arm5_unrelated_slice`) — Gemma 4 + Equal-Token Unrelated Slice (Negative Control)**: Injects `distractors.py:compute_window_digest()`, matched in character/token budget to `Arm 4` (mean prompt `{a31['arm5_unrelated_slice']['mean_prompt_tokens']}` tokens, verified by PBT invariant `P4`) while sharing `0` call-graph edges with `execute_step`.
 
-All LLM arms were executed against real **`google/models/gemma-4-31b-it`** (31B dense instruction-tuned) and **`google/models/gemma-4-26b-a4b-it`** (26B total / 4B active Mixture-of-Experts instruction-tuned) with `temperature=0.0`, separating `<thought>...</thought>` reasoning blocks from extracted code fences (`240` real generations total).
+All LLM arms were executed against real **`google/models/gemma-4-31b-it`** (31B dense instruction-tuned) and **`google/models/gemma-4-26b-a4b-it`** (26B total / 4B active Mixture-of-Experts instruction-tuned) with `temperature=0.0`, separating `<thought>...</thought>` reasoning blocks from extracted code fences (`240` retained generations). The runner allows three attempts: `max_tokens=8192` first, then `16384` after invalid/truncated output or a request error; 7 retained records have `attempt=2`. Only final successful responses are preserved, so failed-attempt causes and costs cannot be reconstructed.
 
 ---
 
@@ -369,11 +370,11 @@ Table 2 summarizes the live loopback HTTP execution outcomes across all **270 ru
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **`Arm 1`: Deterministic AST Codemod** | **{_fmt_pct(a31['arm1_codemod']['solve_rate'])}** (`{a31['arm1_codemod']['pass_count']}/30`) | {_fmt_outcomes(a31['arm1_codemod'])} | **{_fmt_pct(a26['arm1_codemod']['solve_rate'])}** (`{a26['arm1_codemod']['pass_count']}/30`) | {_fmt_outcomes(a26['arm1_codemod'])} | `0.0` |
 | **`Arm 2`: Target File Only** | **{r31_a2}** (`{a31['arm2_target_only']['pass_count']}/30`) | {_fmt_outcomes(a31['arm2_target_only'])} | **{r26_a2}** (`{a26['arm2_target_only']['pass_count']}/30`) | {_fmt_outcomes(a26['arm2_target_only'])} | `{a31['arm2_target_only']['mean_prompt_tokens']}` |
-| **`Arm 3`: 256-d Embedding Top-K** | **{r31_a3}** (`{a31['arm3_embedding_topk']['pass_count']}/30`) | {_fmt_outcomes(a31['arm3_embedding_topk'])} | **{r26_a3}** (`{a26['arm3_embedding_topk']['pass_count']}/30`) | {_fmt_outcomes(a26['arm3_embedding_topk'])} | `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` |
+| **`Arm 3`: HTTP Distractor** | **{r31_a3}** (`{a31['arm3_embedding_topk']['pass_count']}/30`) | {_fmt_outcomes(a31['arm3_embedding_topk'])} | **{r26_a3}** (`{a26['arm3_embedding_topk']['pass_count']}/30`) | {_fmt_outcomes(a26['arm3_embedding_topk'])} | `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` |
 | **`Arm 5`: Equal-Token Unrelated Slice** | **{r31_a5}** (`{a31['arm5_unrelated_slice']['pass_count']}/30`) | {_fmt_outcomes(a31['arm5_unrelated_slice'])} | **{r26_a5}** (`{a26['arm5_unrelated_slice']['pass_count']}/30`) | {_fmt_outcomes(a26['arm5_unrelated_slice'])} | `{a31['arm5_unrelated_slice']['mean_prompt_tokens']}` |
 | **`Arm 4`: StateBridge Call-Graph Slice (Ours)** | **{r31_a4}** (`{a31['arm4_callgraph_slice']['pass_count']}/30`) | {_fmt_outcomes(a31['arm4_callgraph_slice'])} | **{r26_a4}** (`{a26['arm4_callgraph_slice']['pass_count']}/30`) | {_fmt_outcomes(a26['arm4_callgraph_slice'])} | `{a31['arm4_callgraph_slice']['mean_prompt_tokens']}` |
 
-**Key Finding 1 — Call-Graph State Slicing (`Arm 4`) Outperforms Single-File and Embedding RAG by +{_fmt_pct(c31['arm4_vs_arm2']['diff'])} to +{_fmt_pct(c26['arm4_vs_arm2']['diff'])}:**
+**Key Finding 1 — Call-Graph State Slicing (`Arm 4`) Outperforms Single-File and HTTP-Distractor Context by +{_fmt_pct(c31['arm4_vs_arm2']['diff'])} to +{_fmt_pct(c26['arm4_vs_arm2']['diff'])}:**
 On `Gemma-4-31B-IT`, `StateBridge` (`Arm 4`) improves solve rate from **{r31_a2}** (`{a31['arm2_target_only']['pass_count']}/30`) in `Arm 2` and **{r31_a3}** (`{a31['arm3_embedding_topk']['pass_count']}/30`) in `Arm 3` to **{r31_a4}** (`{a31['arm4_callgraph_slice']['pass_count']}/30`), winning `{c31['arm4_vs_arm2']['discordant_a_wins']}` discordant workflow pairs against `{c31['arm4_vs_arm2']['discordant_b_wins']}` losses (exact two-sided McNemar $p = {c31['arm4_vs_arm2']['mcnemar_p']}$, 10,000-draw paired bootstrap 95% CI `[{_fmt_pct(c31['arm4_vs_arm2']['ci95_low'])}, {_fmt_pct(c31['arm4_vs_arm2']['ci95_high'])}]`). On `Gemma-4-26B-A4B-IT`, `StateBridge` (`Arm 4`) jumps from **{r26_a2}** (`{a26['arm2_target_only']['pass_count']}/30`) in `Arm 2` and `Arm 3` to **{r26_a4}** (`{a26['arm4_callgraph_slice']['pass_count']}/30`), winning `{c26['arm4_vs_arm2']['discordant_a_wins']}` discordant pairs against `{c26['arm4_vs_arm2']['discordant_b_wins']}` losses (exact McNemar $p = {c26['arm4_vs_arm2']['mcnemar_p']}$, 95% CI `[{_fmt_pct(c26['arm4_vs_arm2']['ci95_low'])}, {_fmt_pct(c26['arm4_vs_arm2']['ci95_high'])}]`).
 
 **Key Finding 2 — Ruling Out Prompt-Length Confounds (`Arm 4` vs `Arm 5`):**
@@ -387,7 +388,7 @@ Comparing `Arm 4` against the equal-token unrelated slice (`Arm 5`) confirms tha
 
 Comparing the two Gemma 4 architectures reveals a striking efficiency-accuracy trade-off:
 - **MoE `Gemma-4-26B-A4B-IT` (4B active parameters) matches or exceeds Dense `31B-IT` (`{r26_a4}` vs `{r31_a4}`) by investing more internal `<thought>` reasoning**: Across `Arm 4`, `Gemma-4-26B-A4B-IT` generates a mean of **`{a26['arm4_callgraph_slice']['mean_thought_chars']}`** `<thought>` characters (`{a26['arm4_callgraph_slice']['mean_completion_tokens']}` completion tokens) compared to **`{a31['arm4_callgraph_slice']['mean_thought_chars']}`** `<thought>` characters (`{a31['arm4_callgraph_slice']['mean_completion_tokens']}` completion tokens) on `Gemma-4-31B-IT`.
-- **Where the remaining errors occur**: Without `StateBridge` (`Arms 2, 3, 5`), **{_fmt_pct(1.0 - a26['arm2_target_only']['solve_rate'])}** (`{30 - a26['arm2_target_only']['pass_count']}/30`) of runs fail with `STEP_K_WIRE_DIVERGENCE`—the generated code is syntactically valid Python that imports `httpx`, yet silently diverges at Step 0 or Step 1 on the wire (e.g., failing to follow `302` redirects, leaking or dropping `Authorization` headers across origins, or failing to extract scoped cookies). With `StateBridge` (`Arm 4`), wire divergences drop from `26/30` to `{a31['arm4_callgraph_slice']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30` on `31B-IT` and `{a26['arm4_callgraph_slice']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30` on `26B-A4B-IT`.
+- **Where the remaining errors occur**: On `31B-IT`, wire divergences number `{a31['arm2_target_only']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30`, `{a31['arm3_embedding_topk']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30`, and `{a31['arm5_unrelated_slice']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30` for Arms 2, 3, and 5 respectively; on `26B-A4B-IT`, they number `{a26['arm2_target_only']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30`, `{a26['arm3_embedding_topk']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30`, and `{a26['arm5_unrelated_slice']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30`. Arm 4 has `{a31['arm4_callgraph_slice']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30` and `{a26['arm4_callgraph_slice']['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)}/30`. These counts describe this synthetic benchmark; they do not establish dense-retrieval failure.
 
 ---
 
@@ -395,14 +396,14 @@ Comparing the two Gemma 4 architectures reveals a striking efficiency-accuracy t
 
 1. **Gemma 4 Technical Report (Google DeepMind, 2026)**: Introduces the Gemma 4 open-weight model family, including the dense `Gemma-4-31B-IT` and sparse Mixture-of-Experts `Gemma-4-26B-A4B-IT` architectures with native `<thought>` reasoning traces. Our work provides the first controlled evaluation of both architectures on multi-step stateful library migration.
 2. **CodeMigrationBench (2026) & PyMigBench (2023)**: Benchmarks for real-world Python dependency and library migrations. While PyMigBench catalogs syntax-level code changes and CodeMigrationBench evaluates repository test pass rates, `StateBridge-Bench` isolates *stateful false-friend APIs* using a deterministic loopback HTTP state machine that pinpoints exact wire-level step divergences.
-3. **RepoTransBench (2024) & GitChameleon 2.0 (2025)**: Evaluate repository-level code translation and version-conditioned API generation. Our `TwinAPI` audit complements these benchmarks by demonstrating that high embedding similarity (`0.873` cosine) actively misleads Top-K vector retrieval (`Arm 3`) during sibling-library migration.
+3. **RepoTransBench (2024) & GitChameleon 2.0 (2025)**: Evaluate repository-level code translation and version-conditioned API generation. Our `TwinAPI` audit measures API-descriptor similarity (`0.873` cosine); the fixed HTTP-distractor control (`Arm 3`) does not evaluate vector retrieval.
 4. **RFC 9110 (HTTP Semantics) & RFC 6265 (HTTP State Management Mechanism)**: Define the redirect status semantics (`301`/`302`/`303`), cross-origin `Authorization` header stripping requirements, and `Cookie`/`Set-Cookie` domain scoping rules that underpin Divergence Families `F1`, `F2`, and `F3`.
 
 ---
 
 ## 6. Reproduction & Open-Source Artifacts
 
-All artifacts are self-contained and reproducible offline in `< 15 seconds` without external network calls or API keys:
+All replay steps run locally without API keys once source data and dependencies are available. Runtime depends on the machine and worker limit; the measured run took {ssot['benchmark']['replay_elapsed_sec']} seconds with three workers. The public [GitHub repository](https://github.com/GGGODLIN/gemma4-state-bridge), [Run All Notebook](https://github.com/GGGODLIN/gemma4-state-bridge/blob/main/notebooks/reproduce_statebridge.ipynb), and [figure gallery](https://github.com/GGGODLIN/gemma4-state-bridge/tree/main/paper/figures) contain the source and results. The Notebook searches local files and Kaggle Datasets before cloning; without data or Internet it labels its embedded summary as unverified.
 - **One-Command SSOT Replay & Verification**:
   ```bash
   uv run --with requests==2.34.2 --with httpx==0.28.1 python3 scripts/build_ssot.py --verify-replay
@@ -534,7 +535,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
     f"domain-scoped cookie jars, streaming context lifecycles, and status-exception hierarchies. Across 270 live loopback "
     f"HTTP state-machine executions (240 real Gemma 4 generations + 30 AST codemod runs), deterministic AST codemods "
     f"(Arm 1) pass {_fmt_pct(a31['arm1_codemod']['solve_rate'])} ({a31['arm1_codemod']['pass_count']}/30), while target-only "
-    f"prompting (Arm 2) and 256-d embedding Top-K retrieval (Arm 3) both stall at "
+    f"prompting (Arm 2) and fixed HTTP-distractor context (Arm 3) both stall at "
     f"<b>{_fmt_pct(a31['arm2_target_only']['solve_rate'])} ({a31['arm2_target_only']['pass_count']}/30)</b> on Gemma-4-31B-IT "
     f"and <b>{_fmt_pct(a26['arm2_target_only']['solve_rate'])} ({a26['arm2_target_only']['pass_count']}/30)</b> on Gemma-4-26B-A4B-IT. "
     f"We introduce <b>StateBridge</b> (Arm 4), which extracts 1&ndash;2 hop static call-graph state slices from cross-file session "
@@ -606,8 +607,8 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
     story.append(Image(str(figs["fig3"]), width=6.8 * inch, height=3.5 * inch))
     story.append(Paragraph(
       f"<b>Figure 2:</b> TwinAPI 256-d embedding cosine similarity across all {twin['total_pairs_audited']} audited pairs. "
-      f"The {twin['stateful_false_friend_count']} stateful false-friend pairs average "
-      f"{twin['mean_false_friend_embedding_cosine_256d']:.3f} cosine similarity, explaining why vector-RAG retrieves lexical HTTP decoys instead of state bridges.",
+      f"The {twin['stateful_false_friend_count']} stateful false-friend pairs average {twin['mean_false_friend_embedding_cosine_256d']:.3f}. "
+      "API similarity is separate from the fixed HTTP-distractor control (Arm 3); no vector retrieval was evaluated.",
       caption_style,
     ))
 
@@ -615,7 +616,11 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
   story.append(Paragraph("3. StateBridge-Bench &amp; 5-Arm Ablation Results on Gemma 4", h1_style))
   story.append(Paragraph(
     "Table 2 reports the complete 5-arm ablation across Gemma-4-31B-IT (dense) and Gemma-4-26B-A4B-IT (MoE), alongside "
-    "exact two-sided McNemar p-values and 10,000-draw paired bootstrap 95% confidence intervals.",
+    "exact two-sided McNemar p-values and 10,000-draw paired bootstrap 95% confidence intervals. "
+    "Arm 3 selects preview_http_headers by name, excluding session_setup.py; no vector retrieval was tested. "
+    "Retained responses include seven second attempts with a 16384-token budget, following an initial 8192-token attempt. "
+    f"Wire divergences for Arms 2/3/5 are {'/'.join(str(a31[k]['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)) for k in ('arm2_target_only', 'arm3_embedding_topk', 'arm5_unrelated_slice'))} of 30 (31B) and "
+    f"{'/'.join(str(a26[k]['outcome_counts'].get('STEP_K_WIRE_DIVERGENCE', 0)) for k in ('arm2_target_only', 'arm3_embedding_topk', 'arm5_unrelated_slice'))} (26B).",
     body_style,
   ))
 
@@ -631,7 +636,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
       f"{a31['arm2_target_only']['mean_prompt_tokens']}",
     ],
     [
-      "Arm 3: 256-d Embedding Top-K",
+      "Arm 3: HTTP Distractor",
       f"{_fmt_pct(a31['arm3_embedding_topk']['solve_rate'])} ({a31['arm3_embedding_topk']['pass_count']}/30)",
       f"{a31['arm3_embedding_topk']['mean_thought_chars']} chars",
       f"{_fmt_pct(a26['arm3_embedding_topk']['solve_rate'])} ({a26['arm3_embedding_topk']['pass_count']}/30)",
@@ -685,7 +690,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
       "Arm 4 vs Arm 2",
       f"+{_fmt_pct(c31['arm4_vs_arm2']['diff'])}",
       f"{c31['arm4_vs_arm2']['discordant_a_wins']} / {c31['arm4_vs_arm2']['discordant_b_wins']}",
-      f"{c31['arm4_vs_arm2']['mcnemar_p']}",
+      f"{c31['arm4_vs_arm2']['mcnemar_p']:.6e}",
       f"[{_fmt_pct(c31['arm4_vs_arm2']['ci95_low'])}, {_fmt_pct(c31['arm4_vs_arm2']['ci95_high'])}]",
     ],
     [
@@ -693,7 +698,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
       "Arm 4 vs Arm 3",
       f"+{_fmt_pct(c31['arm4_vs_arm3']['diff'])}",
       f"{c31['arm4_vs_arm3']['discordant_a_wins']} / {c31['arm4_vs_arm3']['discordant_b_wins']}",
-      f"{c31['arm4_vs_arm3']['mcnemar_p']}",
+      f"{c31['arm4_vs_arm3']['mcnemar_p']:.6e}",
       f"[{_fmt_pct(c31['arm4_vs_arm3']['ci95_low'])}, {_fmt_pct(c31['arm4_vs_arm3']['ci95_high'])}]",
     ],
     [
@@ -701,7 +706,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
       "Arm 4 vs Arm 5",
       f"+{_fmt_pct(c31['arm4_vs_arm5']['diff'])}",
       f"{c31['arm4_vs_arm5']['discordant_a_wins']} / {c31['arm4_vs_arm5']['discordant_b_wins']}",
-      f"{c31['arm4_vs_arm5']['mcnemar_p']}",
+      f"{c31['arm4_vs_arm5']['mcnemar_p']:.6e}",
       f"[{_fmt_pct(c31['arm4_vs_arm5']['ci95_low'])}, {_fmt_pct(c31['arm4_vs_arm5']['ci95_high'])}]",
     ],
     [
@@ -709,7 +714,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
       "Arm 4 vs Arm 2",
       f"+{_fmt_pct(c26['arm4_vs_arm2']['diff'])}",
       f"{c26['arm4_vs_arm2']['discordant_a_wins']} / {c26['arm4_vs_arm2']['discordant_b_wins']}",
-      f"{c26['arm4_vs_arm2']['mcnemar_p']}",
+      f"{c26['arm4_vs_arm2']['mcnemar_p']:.6e}",
       f"[{_fmt_pct(c26['arm4_vs_arm2']['ci95_low'])}, {_fmt_pct(c26['arm4_vs_arm2']['ci95_high'])}]",
     ],
     [
@@ -717,7 +722,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
       "Arm 4 vs Arm 3",
       f"+{_fmt_pct(c26['arm4_vs_arm3']['diff'])}",
       f"{c26['arm4_vs_arm3']['discordant_a_wins']} / {c26['arm4_vs_arm3']['discordant_b_wins']}",
-      f"{c26['arm4_vs_arm3']['mcnemar_p']}",
+      f"{c26['arm4_vs_arm3']['mcnemar_p']:.6e}",
       f"[{_fmt_pct(c26['arm4_vs_arm3']['ci95_low'])}, {_fmt_pct(c26['arm4_vs_arm3']['ci95_high'])}]",
     ],
     [
@@ -725,7 +730,7 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
       "Arm 4 vs Arm 5",
       f"+{_fmt_pct(c26['arm4_vs_arm5']['diff'])}",
       f"{c26['arm4_vs_arm5']['discordant_a_wins']} / {c26['arm4_vs_arm5']['discordant_b_wins']}",
-      f"{c26['arm4_vs_arm5']['mcnemar_p']}",
+      f"{c26['arm4_vs_arm5']['mcnemar_p']:.6e}",
       f"[{_fmt_pct(c26['arm4_vs_arm5']['ci95_low'])}, {_fmt_pct(c26['arm4_vs_arm5']['ci95_high'])}]",
     ],
   ]
@@ -752,115 +757,89 @@ def _build_paper_pdf(ssot: dict[str, Any], audit: dict[str, Any], figs: dict[str
 
 
 def _build_and_execute_notebook(base: Path, nb_path: Path) -> None:
-  nb_path.parent.mkdir(parents=True, exist_ok=True)
-  cell1_code = """import json
-from pathlib import Path
-
-ROOT = Path(".").resolve()
-if not (ROOT / "artifacts").exists():
-  ROOT = ROOT.parent
-
-ssot = json.loads((ROOT / "artifacts" / "metrics_ssot.json").read_text(encoding="utf-8"))
-twin = ssot["twinapi_audit"]
-print("=== TwinAPI Stateful False-Friend Audit (requests==2.34.2 vs httpx==0.28.1) ===")
-print(f"Top-level function exact name overlap: {twin['top_level_exact_name_overlap_ratio']*100:.1f}% (8/9)")
-print(f"Session/Client core verb overlap:      {twin['session_client_core_overlap_ratio']*100:.1f}% (10/12)")
-print(f"Mean 256-d false-friend cosine sim:    {twin['mean_false_friend_embedding_cosine_256d']:.3f} ({twin['stateful_false_friend_count']}/{twin['total_pairs_audited']} pairs)")
-"""
-
-  cell2_code = """import sys
-import time
-SCRIPTS_DIR = ROOT / "scripts"
-SKILL_SCRIPTS = ROOT / "skills" / "state-bridge" / "scripts"
-for p in (SCRIPTS_DIR, SKILL_SCRIPTS):
-  if str(p) not in sys.path:
-    sys.path.insert(0, str(p))
-import build_ssot as bs
-import statebridge_core as sb
-
-wfs = sb.get_benchmark_workflows()
-t0 = time.monotonic()
-replayed_ssot = bs.build_ssot(ROOT / "artifacts" / "raw_llm_generations.jsonl", ROOT / "artifacts")
-live_elapsed = round(time.monotonic() - t0, 3)
-sample_wf = wfs[0]
-gold_res = sb.run_workflow_sandbox(sample_wf, sample_wf["httpx_gold_files"])
-codemod_ctx = sb.build_arm_context(sample_wf, "arm1_codemod")
-codemod_res = sb.run_workflow_sandbox(sample_wf, codemod_ctx["migrated_files"])
-print(f"Loaded {len(wfs)} multi-step workflows across 5 divergence families.")
-print(f"Sample {sample_wf['id']} Gold httpx outcome:    {gold_res['outcome_category']} (steps={gold_res['candidate_trace_len']})")
-print(f"Sample {sample_wf['id']} Arm 1 Codemod outcome: {codemod_res['outcome_category']} at step={codemod_res['first_divergence_step']} ({codemod_res['divergence_field']})")
-print(f"Live 270-run SSOT replay completed in: {live_elapsed}s (recorded benchmark={replayed_ssot['benchmark']['replay_elapsed_sec']}s < 15s)")
-"""
-
-  cell3_code = """for model_key in ("gemma-4-31b-it", "gemma-4-26b-a4b-it"):
-  m = ssot["models"][model_key]
-  print(f"\\n=== Model: {model_key} ({m['full_model_id']}) ===")
-  for arm_id, arm_obj in m["arms"].items():
-    rate_pct = arm_obj["solve_rate"] * 100
-    print(f"  {arm_id:22s}: {rate_pct:5.1f}% ({arm_obj['pass_count']}/30) | prompt_tok={arm_obj['mean_prompt_tokens']} | thought_chars={arm_obj['mean_thought_chars']}")
-  for cmp_key, cmp_obj in m["paired_comparisons"].items():
-    print(f"  [{cmp_key}] diff=+{cmp_obj['diff']*100:.1f}% | discordant={cmp_obj['discordant_a_wins']}:{cmp_obj['discordant_b_wins']} | McNemar p={cmp_obj['mcnemar_p']} | 95% CI=[{cmp_obj['ci95_low']*100:.1f}%, {cmp_obj['ci95_high']*100:.1f}%]")
-"""
-
-  cell4_code = """runs = [json.loads(line) for line in (ROOT / "artifacts" / "runs.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
-print(f"Total evaluated live loopback HTTP runs in runs.jsonl: {len(runs)}")
-for fam in ("F1_REDIRECT_FOLLOW_DEFAULT", "F2_CROSS_ORIGIN_AUTH_STRIP", "F3_COOKIE_JAR_SCOPING", "F4_STREAM_CONTEXT_LIFECYCLE", "F5_CLIENT_INIT_AND_STATUS_ERROR"):
-  p31 = ssot["models"]["gemma-4-31b-it"]["arms"]["arm4_callgraph_slice"]["by_family"][fam]["pass_count"]
-  p26 = ssot["models"]["gemma-4-26b-a4b-it"]["arms"]["arm4_callgraph_slice"]["by_family"][fam]["pass_count"]
-  print(f"  {fam:34s} | 31B-IT Arm 4: {p31}/6 | 26B-A4B-IT Arm 4: {p26}/6")
-"""
-
-  # Execute cells in shared namespace to capture real outputs
   import os
-  prev_cwd = Path.cwd()
-  ns: dict[str, Any] = {"__name__": "__main__"}
-  code_blocks = [cell1_code, cell2_code, cell3_code, cell4_code]
-  executed_cells: list[dict[str, Any]] = [
-    {
-      "cell_type": "markdown",
-      "id": "md-intro",
-      "metadata": {},
-      "source": [
-        "# StateBridge × TwinAPI — Live Loopback HTTP Reproduction Notebook\n",
-        "Reproduces the **TwinAPI** Stateful False-Friend Audit and all **270 live loopback HTTP state-machine runs** (`Gemma-4-31B-IT` and `Gemma-4-26B-A4B-IT`) in `< 15 seconds` offline."
-      ],
-    }
-  ]
+  import tempfile
+  import nbformat
+  from nbclient import NotebookClient
 
-  try:
-    os.chdir(base)
-    for idx, code_str in enumerate(code_blocks, start=1):
-      buf = io.StringIO()
-      with contextlib.redirect_stdout(buf):
-        exec(code_str, ns)
-      out_str = buf.getvalue()
-      executed_cells.append({
-        "cell_type": "code",
-        "execution_count": idx,
-        "id": f"code-cell-{idx}",
-        "metadata": {},
-        "outputs": [
-          {
-            "name": "stdout",
-            "output_type": "stream",
-            "text": [line + "\n" for line in out_str.splitlines()],
-          }
-        ],
-        "source": [line + "\n" for line in code_str.splitlines()],
-      })
-  finally:
-    os.chdir(prev_cwd)
-
-  nb_payload = {
-    "cells": executed_cells,
-    "metadata": {
-      "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
-      "language_info": {"name": "python", "version": "3.11"},
-    },
-    "nbformat": 4,
-    "nbformat_minor": 5,
-  }
-  nb_path.write_text(json.dumps(nb_payload, indent=2, ensure_ascii=False), encoding="utf-8")
+  frozen = json.loads((base / "artifacts/metrics_ssot.json").read_text())
+  bootstrap = (base / "scripts/notebook_bootstrap.py").read_text()
+  cell1 = bootstrap + "\nROOT = locate_statebridge_repo()\n" + f"ssot = {frozen!r}\n"
+  cell1 += '''twin = ssot["twinapi_audit"]
+print(f"Top-level name overlap: {twin['top_level_exact_name_overlap_ratio']*100:.1f}% (8/9)")
+print(f"Session/Client overlap: {twin['session_client_core_overlap_ratio']*100:.1f}% (10/12)")
+print(f"Mean 256-d audit cosine: {twin['mean_false_friend_embedding_cosine_256d']:.3f}")
+'''
+  cell2 = '''if ROOT is not None:
+  require_replay_dependencies()
+  import shutil
+  import time
+  sys.path.insert(0, str(ROOT / "scripts"))
+  import build_ssot as bs
+  frozen_models = ssot["models"]
+  replay_dir = Path(tempfile.mkdtemp(prefix="statebridge-replay-", dir=Path.cwd()))
+  shutil.copy2(ROOT / "artifacts/twinapi_audit.json", replay_dir / "twinapi_audit.json")
+  t0 = time.monotonic()
+  ssot = bs.build_ssot(ROOT / "artifacts/raw_llm_generations.jsonl", replay_dir)
+  assert ssot["models"] == frozen_models, "Live replay differs from embedded published results"
+  live_elapsed = round(time.monotonic() - t0, 3)
+  runs = [json.loads(line) for line in (replay_dir / "runs.jsonl").read_text().splitlines()]
+  assert len(runs) == 270
+  print(f"LIVE REPLAY VERIFIED: {len(runs)} runs, exact statistics match; elapsed={live_elapsed}s")
+else:
+  print("SUMMARY ONLY: live replay skipped; no reproduction claim.")
+'''
+  cell3 = '''for model_key, model in ssot["models"].items():
+  print(f"\\n=== {model_key} ===")
+  for arm_id, arm in model["arms"].items():
+    print(f"{arm_id}: {arm['solve_rate']*100:.1f}% ({arm['pass_count']}/{arm['total']})")
+  for comparison, stats in model["paired_comparisons"].items():
+    print(f"{comparison}: p={stats['mcnemar_p']}, discordant={stats['discordant_a_wins']}:{stats['discordant_b_wins']}, CI=[{stats['ci95_low']*100:.1f}%, {stats['ci95_high']*100:.1f}%]")
+'''
+  cell4 = '''if ROOT is not None:
+  import matplotlib
+  matplotlib.use("Agg")
+  import matplotlib.pyplot as plt
+  from IPython.display import Image, display
+  order = list(ssot["models"]["gemma-4-31b-it"]["arms"])
+  fig, ax = plt.subplots(figsize=(9, 4))
+  for i, (model_key, model) in enumerate(ssot["models"].items()):
+    ax.bar([j + i * 0.36 for j in range(len(order))],
+           [model["arms"][arm]["pass_count"] for arm in order],
+           width=0.34, label=model_key, color=("#2a78d6", "#eb6834")[i])
+  ax.set_xticks([j + 0.18 for j in range(len(order))], ["AST", "Target", "HTTP distractor", "StateBridge", "Unrelated"])
+  ax.set_ylabel("Equivalent workflows / 30")
+  ax.set_ylim(0, 33)
+  ax.legend()
+  fig.tight_layout()
+  figure_path = replay_dir / "live_solve_rates.png"
+  fig.savefig(figure_path, dpi=160)
+  plt.close(fig)
+  display(Image(filename=str(figure_path)))
+  print("Figure generated from live replay statistics.")
+else:
+  print("SUMMARY ONLY: figures were not recomputed.")
+'''
+  nb = nbformat.v4.new_notebook(cells=[
+    nbformat.v4.new_markdown_cell(
+      "# StateBridge × TwinAPI — Reproduction\n"
+      "Run All from an empty directory. Finds local files or a Kaggle Dataset, otherwise shallow-clones "
+      "[the public repository](https://github.com/GGGODLIN/gemma4-state-bridge). "
+      "Internet is needed for the first clone/dependency installation. Offline without data: "
+      "precomputed summary only, clearly marked; no live-verification claim. "
+      "Arm 3 is a fixed HTTP distractor; its legacy identifier is retained. "
+      "Replay writes to a working-directory temporary folder; mounted inputs remain read-only."
+    ),
+    *[nbformat.v4.new_code_cell(code) for code in (cell1, cell2, cell3, cell4)],
+  ], metadata={"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}})
+  with tempfile.TemporaryDirectory(prefix="statebridge-notebook-") as temp:
+    temp_path = Path(temp)
+    working = temp_path / "working"
+    working.mkdir()
+    client = NotebookClient(nb, timeout=240, resources={"metadata": {"path": str(working)}})
+    client.execute(env={**os.environ, "STATEBRIDGE_INPUT_ROOT": str(base), "STATEBRIDGE_OFFLINE": "1"})
+  nb_path.parent.mkdir(parents=True, exist_ok=True)
+  nbformat.write(nb, nb_path)
 
 
 def _build_readmes(ssot: dict[str, Any], base: Path) -> None:
@@ -880,7 +859,7 @@ def _build_readmes(ssot: dict[str, Any], base: Path) -> None:
 
 [![Track](https://img.shields.io/badge/Kaggle-Gemma_4_Developer_Agent_Paper-2a78d6)](#)
 [![Models](https://img.shields.io/badge/Models-Gemma--4--31B--IT_%26_26B--A4B--IT-eb6834)](#)
-[![Tests](https://img.shields.io/badge/Tests-17%2F17_Passing_(PBT_P1..P4)-0ca30c)](#)
+[![Tests](https://img.shields.io/badge/Tests-PBT_P1..P4_%26_regressions-0ca30c)](#)
 
 > **[繁體中文說明 (README.zh-TW.md)](/README.zh-TW.md)** · **[Kaggle Paper Track Writeup](/writeup/KAGGLE_WRITEUP.md)** · **[Full Paper PDF](/paper/paper.pdf)** · **[Reproducible Notebook](/notebooks/reproduce_statebridge.ipynb)** · **[Interactive HTML Explorer](/explorer/index.html)**
 
@@ -903,7 +882,7 @@ When autonomous coding agents migrate repositories across sibling libraries such
 | :--- | :---: | :---: | :---: |
 | **`Arm 1`: Deterministic AST Codemod** | **0.0%** (`0/30`) | **0.0%** (`0/30`) | `0.0` |
 | **`Arm 2`: Target File Only + Cheat-Sheet** | **{_fmt_pct(a31['arm2_target_only']['solve_rate'])}** (`{a31['arm2_target_only']['pass_count']}/30`) | **{_fmt_pct(a26['arm2_target_only']['solve_rate'])}** (`{a26['arm2_target_only']['pass_count']}/30`) | `{a31['arm2_target_only']['mean_prompt_tokens']}` |
-| **`Arm 3`: 256-d Embedding Top-K (Decoy)** | **{_fmt_pct(a31['arm3_embedding_topk']['solve_rate'])}** (`{a31['arm3_embedding_topk']['pass_count']}/30`) | **{_fmt_pct(a26['arm3_embedding_topk']['solve_rate'])}** (`{a26['arm3_embedding_topk']['pass_count']}/30`) | `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` |
+| **`Arm 3`: HTTP Distractor (Decoy)** | **{_fmt_pct(a31['arm3_embedding_topk']['solve_rate'])}** (`{a31['arm3_embedding_topk']['pass_count']}/30`) | **{_fmt_pct(a26['arm3_embedding_topk']['solve_rate'])}** (`{a26['arm3_embedding_topk']['pass_count']}/30`) | `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` |
 | **`Arm 5`: Equal-Token Unrelated Slice (Control)** | **{_fmt_pct(a31['arm5_unrelated_slice']['solve_rate'])}** (`{a31['arm5_unrelated_slice']['pass_count']}/30`) | **{_fmt_pct(a26['arm5_unrelated_slice']['solve_rate'])}** (`{a26['arm5_unrelated_slice']['pass_count']}/30`) | `{a31['arm5_unrelated_slice']['mean_prompt_tokens']}` |
 | **`Arm 4`: StateBridge Call-Graph Slice (Ours)** | **{_fmt_pct(a31['arm4_callgraph_slice']['solve_rate'])}** (`{a31['arm4_callgraph_slice']['pass_count']}/30`, $p={c31['arm4_vs_arm2']['mcnemar_p']}$) | **{_fmt_pct(a26['arm4_callgraph_slice']['solve_rate'])}** (`{a26['arm4_callgraph_slice']['pass_count']}/30`, $p={c26['arm4_vs_arm2']['mcnemar_p']}$) | `{a31['arm4_callgraph_slice']['mean_prompt_tokens']}` |
 
@@ -914,19 +893,21 @@ When autonomous coding agents migrate repositories across sibling libraries such
 - [`writeup/KAGGLE_WRITEUP.md`](/writeup/KAGGLE_WRITEUP.md) — Official Kaggle Paper Track Writeup (`<= 3,000` words).
 - [`paper/paper.pdf`](/paper/paper.pdf) & [`paper/paper.md`](/paper/paper.md) — Full arXiv-formatted paper and vector/high-DPI figures.
 - [`notebooks/reproduce_statebridge.ipynb`](/notebooks/reproduce_statebridge.ipynb) — Self-contained executed Kaggle Notebook that replays all 270 runs against the live loopback HTTP state machine in `{ssot['benchmark']['replay_elapsed_sec']}s`.
-- [`explorer/index.html`](/explorer/index.html) — Single-file offline interactive HTML Explorer (`TwinAPI` map, 1-vs-1 diff split view, First-Divergence step inspector, `#case=<id>&arm=<arm>&model=<model>` deep-linking).
+- [`explorer/index.html`](/explorer/index.html) — Single-file offline interactive HTML Explorer (`TwinAPI` map, 1-vs-1 diff split view, First-Divergence step inspector, `#case=<id>&arm=<arm>&model=<model>` deep-linking). Download the repository and open this file directly in a browser; no server, backend, CDN, or build is required.
 - [`skills/state-bridge/SKILL.md`](/skills/state-bridge/SKILL.md) & [`skills/state-bridge/scripts/statebridge_core.py`](/skills/state-bridge/scripts/statebridge_core.py) — Reusable Agent Skill, 30-workflow `StateBridge-Bench` suite, loopback HTTP oracle, and `P1..P4` PBT invariants.
 - [`artifacts/`](/artifacts) — Frozen 240 real Gemma 4 generations (`raw_llm_generations.jsonl`), 270 live execution receipts (`runs.jsonl`), 256-d embeddings (`twinapi_embeddings_256d.json`), and single source of truth metrics (`metrics_ssot.json`).
 
 ---
 
-## Quickstart (< 15 Seconds Offline Verification)
+## Quickstart (Local Replay; Runtime Depends on Hardware)
+
+Arm 3 used a fixed HTTP distractor selected by name, excluding session setup; its legacy `arm3_embedding_topk` key does not mean vector retrieval was evaluated. The Notebook finds local files or a mounted `/kaggle/input/<dataset>/` repository, then tries a shallow clone. Internet is needed for the initial clone and missing dependencies. Without source data and Internet it displays a marked precomputed summary, without claiming live verification.
 
 ```bash
 # 1. Replay all 270 candidate programs against the live 127.0.0.1:0 Loopback HTTP State Machine
 uv run --with requests==2.34.2 --with httpx==0.28.1 python3 scripts/build_ssot.py --verify-replay
 
-# 2. Run the full 17-test pytest suite (Seam 1 PBT P1..P4 + Seam 2 SSOT + Seam 3 Mutation Gate)
+# 2. Run pytest (PBT P1..P4, SSOT, and Notebook bootstrap regressions)
 uv run --with requests==2.34.2 --with httpx==0.28.1 --with pytest python3 -m pytest -v
 
 # 3. Verify 100% SSOT numerical consistency across all 5 submission surfaces
@@ -953,13 +934,17 @@ python3 scripts/verify_ssot_consistency.py
 | :--- | :---: | :---: | :---: |
 | **`Arm 1`：決定性 AST Codemod** | **0.0%** (`0/30`) | **0.0%** (`0/30`) | `0.0` |
 | **`Arm 2`：單一目標檔 + 靜態對照表** | **{_fmt_pct(a31['arm2_target_only']['solve_rate'])}** (`{a31['arm2_target_only']['pass_count']}/30`) | **{_fmt_pct(a26['arm2_target_only']['solve_rate'])}** (`{a26['arm2_target_only']['pass_count']}/30`) | `{a31['arm2_target_only']['mean_prompt_tokens']}` |
-| **`Arm 3`：256 維 Embedding Top-K** | **{_fmt_pct(a31['arm3_embedding_topk']['solve_rate'])}** (`{a31['arm3_embedding_topk']['pass_count']}/30`) | **{_fmt_pct(a26['arm3_embedding_topk']['solve_rate'])}** (`{a26['arm3_embedding_topk']['pass_count']}/30`) | `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` |
+| **`Arm 3`：固定 HTTP 干擾函式** | **{_fmt_pct(a31['arm3_embedding_topk']['solve_rate'])}** (`{a31['arm3_embedding_topk']['pass_count']}/30`) | **{_fmt_pct(a26['arm3_embedding_topk']['solve_rate'])}** (`{a26['arm3_embedding_topk']['pass_count']}/30`) | `{a31['arm3_embedding_topk']['mean_prompt_tokens']}` |
 | **`Arm 5`：等預算無關函式切片（對照組）** | **{_fmt_pct(a31['arm5_unrelated_slice']['solve_rate'])}** (`{a31['arm5_unrelated_slice']['pass_count']}/30`) | **{_fmt_pct(a26['arm5_unrelated_slice']['solve_rate'])}** (`{a26['arm5_unrelated_slice']['pass_count']}/30`) | `{a31['arm5_unrelated_slice']['mean_prompt_tokens']}` |
 | **`Arm 4`：StateBridge 呼叫圖狀態切片** | **{_fmt_pct(a31['arm4_callgraph_slice']['solve_rate'])}** (`{a31['arm4_callgraph_slice']['pass_count']}/30`, $p={c31['arm4_vs_arm2']['mcnemar_p']}$) | **{_fmt_pct(a26['arm4_callgraph_slice']['solve_rate'])}** (`{a26['arm4_callgraph_slice']['pass_count']}/30`, $p={c26['arm4_vs_arm2']['mcnemar_p']}$) | `{a31['arm4_callgraph_slice']['mean_prompt_tokens']}` |
 
 ---
 
-## 15 秒離線重現指令
+## 離線重現指令（時間依硬體而異）
+
+下載 repo 後，直接用瀏覽器開啟 [Explorer](/explorer/index.html)，不需要後端、伺服器或建置。Arm 3 是固定選取的 HTTP 干擾函式對照組；`arm3_embedding_topk` 為沿用的識別名稱，實驗未測試向量檢索。
+
+Notebook 先尋找本機 repo 或 `/kaggle/input/<dataset>/` 掛載內容，找不到才從公開 repo clone。第一次下載原碼與安裝依賴需要網路；沒有資料且離線時，只展示明確標示的預先計算摘要，不宣稱通過重現驗收。
 
 ```bash
 uv run --with requests==2.34.2 --with httpx==0.28.1 python3 scripts/build_ssot.py --verify-replay
